@@ -13,59 +13,50 @@
 
     <title>X-Wing Scoreboard</title>
     <style>
-        .full-height-and-width {
-            height: 100%;
-            width: 100%;
-            margin: 0px;
-            padding: 0px;
-        }
-
-        .full-width {
-            width: 100%;
-        }
-
         #xwsForm {
             padding: 15px;
-            background-color: #AAAAAA;
-            color: white;
             margin-top: 20px;
         }
         .total-squad-points-destroyed {
             text-align: right;
             font-weight: bold;
-            color: red;
+            margin-top: 10px;
         }
         .squad-form {
             padding: 15px;
             display: none;
         }
-
-        body {
-            background-color: #909090;
+        .squad-1-color {
+            background-color: lightcyan;
+        }
+        .squad-2-color {
+            background-color: lightpink;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-dark">
     <br>
     <div class="container-fluid">
-        <button type="submit" class="btn btn-primary btn-sm btn-info" onclick="showOrHideXWSFormElement()">Show / Hide
+        <h2 class="text-light">X-Wing Scoreboard</h2>
+        <br>
+        <button type="submit" class="btn btn-primary btn-sm btn-info" onclick="showOrHideXWSFormElement()" id="showOrHideXWSFormButton">Hide
             XWS Form</button>
         <a type="submit" class="btn btn-primary btn-sm btn-secondary" href="https://raithos.github.io/"
-            target="_blank">Open YASB 2.0</a>
-        <a type="submit" class="btn btn-primary btn-sm btn-secondary" href="https://tabletop.to/" target="_blank">Open
-            TTO</a>
+            target="_blank">🔗 YASB 2.0</a>
+        <a type="submit" class="btn btn-primary btn-sm btn-secondary" href="https://tabletop.to/" target="_blank">🔗 TTO</a>
         <br>
-        <form id="xwsForm">
+        <form id="xwsForm" class="bg-light">
             <div class="form-group">
-                <label>Squad 1 XWS</label>
-                <input type="text" class="form-control" id="squad1XWS" placeholder="Paste Squad 1 XWS here"
-                    style="background-color: lightcyan;">
+                <label class="text-dark">Squad 1 XWS</label>
+                <input type="text" class="form-control squad-1-color" id="squad1XWS" placeholder="Paste Squad 1 XWS here">
             </div>
+            <button type="button" class="btn btn-primary btn-sm btn-secondary" onclick="saveToURL()">Save squad XWS to URL</button>  
+            <br>          
+            <br>     
             <div class="form-group">
-                <label>Squad 2 XWS</label>
-                <input type="text" class="form-control" id="squad2XWS" placeholder="Paste Squad 2 XWS here"
-                    style="background-color: lightpink;">
+                <label class="text-dark">Squad 2 XWS</label>
+                <input type="text" class="form-control squad-2-color" id="squad2XWS" placeholder="Paste Squad 2 XWS here">
             </div>
             <button type="button" class="btn btn-primary btn-sm btn-danger" onclick="populateScoreboard()">Populate
                 Scoreboard</button>
@@ -73,37 +64,51 @@
             <small>Then mouse-over a pilot in order to see a tool-tip showing that pilot's upgrades</small>
         </form>
         <br>
-        <form id="squad1Form" class="squad-form" style="background-color: lightcyan;">
+        <form id="squad1Form" class="squad-form squad-1-color">
         </form>
         <br>
-        <form id="squad2Form" class="squad-form" style="background-color: lightpink;">
+        <form id="squad2Form" class="squad-form squad-2-color">
         </form>
     </div>
 
     <!-- Optional JavaScript -->
     <script>
+
+        var urlParams = new URLSearchParams(window.location.search);
+
+        if(urlParams.has('squad1XWS')) {
+            console.log("Importing squad 1 XWS from URL");
+            document.getElementById("squad1XWS").value = decodeURI(window.location.href.split("squad1XWS=")[1]);
+        }
+
+        function saveToURL() {
+            window.location.search = "squad1XWS=" + document.getElementById("squad1XWS").value;
+        }
+
         function showOrHideXWSFormElement() {
             var element = document.getElementById("xwsForm");
             if ((element.style.display == "") || (element.style.display == "block")) {
                 element.style.display = "none";
+                document.getElementById("showOrHideXWSFormButton").innerText = "Show XWS Form";
             } else {
                 element.style.display = "block";
+                document.getElementById("showOrHideXWSFormButton").innerText = "Hide XWS Form";
             }
         }
 
         function populateScoreboard() {
             document.getElementById("xwsForm").style.display = "none";
-            populateScoreboardForASquad("squad1XWS", "squad1Form");
-            populateScoreboardForASquad("squad2XWS", "squad2Form");
+            populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
+            populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
         }
 
-        function populateScoreboardForASquad(squadXWSElementId, squadFormElementId) {
+        function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squadNumber) {
             try {
                 var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
                 console.log("Squad JSON:", squadJSON);
                 var squadFormElement = document.getElementById(squadFormElementId);
                 document.getElementById(squadFormElementId).style.display = "block";
-                squadFormElement.innerHTML = "";
+                squadFormElement.innerHTML = "<h4>Squad " + squadNumber + "</h4>";
                 for (var i = 0; i < squadJSON.pilots.length; i++) {
                     var toolTipText = "No upgrades";
                     if (squadJSON.pilots[i].upgrades) {
@@ -123,6 +128,7 @@
                 var totalDestroyed = document.createElement("div");
                 totalDestroyed.innerHTML = "Total squad points destroyed: 0";
                 totalDestroyed.classList.add("total-squad-points-destroyed")
+                totalDestroyed.classList.add("text-danger")
                 squadFormElement.appendChild(totalDestroyed);
             } catch (err) {
                 console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
