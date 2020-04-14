@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>X-Wing Scoreboard</title>
+    <style>
+        .full-height-and-width {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        #xwsForm {
+            padding: 15px;
+            background-color: #AAAAAA;
+            color: white;
+            margin-top: 20px;
+        }
+        .total-squad-points-destroyed {
+            text-align: right;
+            font-weight: bold;
+            color: red;
+        }
+        .squad-form {
+            padding: 15px;
+            display: none;
+        }
+
+        body {
+            background-color: #909090;
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <div class="container-fluid">
+        <button type="submit" class="btn btn-primary btn-sm btn-info" onclick="showOrHideXWSFormElement()">Show / Hide
+            XWS Form</button>
+        <a type="submit" class="btn btn-primary btn-sm btn-secondary" href="https://raithos.github.io/"
+            target="_blank">Open YASB 2.0</a>
+        <a type="submit" class="btn btn-primary btn-sm btn-secondary" href="https://tabletop.to/" target="_blank">Open
+            TTO</a>
+        <br>
+        <form id="xwsForm">
+            <div class="form-group">
+                <label>Squad 1 XWS</label>
+                <input type="text" class="form-control" id="squad1XWS" placeholder="Paste Squad 1 XWS here"
+                    style="background-color: lightcyan;">
+            </div>
+            <div class="form-group">
+                <label>Squad 2 XWS</label>
+                <input type="text" class="form-control" id="squad2XWS" placeholder="Paste Squad 2 XWS here"
+                    style="background-color: lightpink;">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm btn-danger" onclick="populateScoreboard()">Populate
+                Scoreboard</button>
+            <br>
+            <small>Then mouse-over a pilot in order to see a tool-tip showing that pilot's upgrades</small>
+        </form>
+        <br>
+        <form id="squad1Form" class="squad-form" style="background-color: lightcyan;">
+        </form>
+        <br>
+        <form id="squad2Form" class="squad-form" style="background-color: lightpink;">
+        </form>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <script>
+        function showOrHideXWSFormElement() {
+            var element = document.getElementById("xwsForm");
+            if ((element.style.display == "") || (element.style.display == "block")) {
+                element.style.display = "none";
+            } else {
+                element.style.display = "block";
+            }
+        }
+
+        function populateScoreboard() {
+            document.getElementById("xwsForm").style.display = "none";
+            populateScoreboardForASquad("squad1XWS", "squad1Form");
+            populateScoreboardForASquad("squad2XWS", "squad2Form");
+        }
+
+        function populateScoreboardForASquad(squadXWSElementId, squadFormElementId) {
+            try {
+                var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
+                console.log("Squad JSON:", squadJSON);
+                var squadFormElement = document.getElementById(squadFormElementId);
+                document.getElementById(squadFormElementId).style.display = "block";
+                squadFormElement.innerHTML = "";
+                for (var i = 0; i < squadJSON.pilots.length; i++) {
+                    var toolTipText = "No upgrades";
+                    if (squadJSON.pilots[i].upgrades) {
+                        toolTipText = "Upgrades:\n" + JSON.stringify(squadJSON.pilots[i].upgrades).replace(/"/g, '').replace(/{/g, '').replace(/}/g, '').replace(/\[/g, '').replace(/\],/g, '\n').replace(/\,/g, ', ').replace(/\:/g, ': ').replace("]", "");
+                    }
+                    var pilotRowHTML = "";
+                    pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (squadJSON.pilots[i].name.charAt(0).toUpperCase() + squadJSON.pilots[i].name.substring(1)) + "</b> (" + squadJSON.pilots[i].ship + ")" + "</label></div>";
+                    pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-input'><b>" + squadJSON.pilots[i].points + "</b> points (whole)</label></div>";
+                    pilotRowHTML += "<div class='col'><label class='col-form-label half-points-input'><b>" + squadJSON.pilots[i].points / 2 + "</b> points (halved)</label></div>";
+                    pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePoints(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
+                    pilotRowHTML += "<div class='col-sm-1' style='display: none;'><label class='col-form-label pilot-points-destroyed'>Points destroyed: <b>0</b></label></div>";
+                    var pilotRow = document.createElement("div");
+                    pilotRow.classList.add("form-row")
+                    pilotRow.innerHTML = pilotRowHTML;
+                    squadFormElement.appendChild(pilotRow);
+                }
+                var totalDestroyed = document.createElement("div");
+                totalDestroyed.innerHTML = "Total squad points destroyed: 0";
+                totalDestroyed.classList.add("total-squad-points-destroyed")
+                squadFormElement.appendChild(totalDestroyed);
+            } catch (err) {
+                console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
+            }
+        }
+
+        function updatePoints(selectElement) {
+            var pilotRowElement = selectElement.parentElement.parentElement;
+            var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed")[0];
+            console.log(pilotRowElement);
+            pilotPointsdestroyedElement.innerHTML = "Points destroyed: <b>" + selectElement.value * parseInt(pilotRowElement.getElementsByClassName("whole-points-input")[0].innerText.split(" ")[0]) + "</b>";
+            var totalSquadPointsDestroyedElement = pilotRowElement.parentElement.getElementsByClassName("total-squad-points-destroyed")[0];
+            var newTotalPointsDestroyed = 0;
+            var pilotPointsElements = pilotRowElement.parentElement.getElementsByClassName("pilot-points-destroyed");
+            for (var i = 0; i < pilotPointsElements.length; i++) {
+                newTotalPointsDestroyed += parseFloat(pilotPointsElements[i].innerText.replace("Points destroyed: ", ""));
+            }
+            totalSquadPointsDestroyedElement.innerText = "Total squad points destroyed: " + newTotalPointsDestroyed;
+        }
+    </script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
