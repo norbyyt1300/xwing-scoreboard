@@ -22,6 +22,10 @@
             font-weight: bold;
             margin-top: 10px;
         }
+        .total-squad-points {
+            text-align: right;
+            margin-top: 10px;
+        }
         .squad-form {
             padding: 15px;
             display: none;
@@ -112,6 +116,7 @@
 
         function populateScoreboard() {
             document.getElementById("xwsForm").style.display = "none";
+            document.getElementById("showOrHideXWSFormButton").innerText = "Show XWS Form";
             populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
             populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
         }
@@ -144,6 +149,10 @@
                 totalDestroyed.classList.add("total-squad-points-destroyed")
                 totalDestroyed.classList.add("text-danger")
                 squadFormElement.appendChild(totalDestroyed);
+                var totalPoints = document.createElement("div");
+                totalPoints.classList.add("total-squad-points")
+                totalPoints.innerHTML = "Total initial squad points: " + squadJSON.points;
+                squadFormElement.appendChild(totalPoints);
             } catch (err) {
                 console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
             }
