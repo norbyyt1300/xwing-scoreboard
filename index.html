@@ -175,7 +175,7 @@
             var pilotRowElement = selectElement.parentElement.parentElement;
             var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed")[0];
             console.log(pilotRowElement);
-            pilotPointsdestroyedElement.innerHTML = "Points destroyed: <b>" + selectElement.value * parseInt(pilotRowElement.getElementsByClassName("whole-points-input")[0].innerText.split(" ")[0]) + "</b>";
+            pilotPointsdestroyedElement.innerHTML = "Points destroyed: <b>" + Math.ceil(selectElement.value * parseInt(pilotRowElement.getElementsByClassName("whole-points-input")[0].innerText.split(" ")[0])) + "</b>";
             var totalSquadPointsDestroyedElement = pilotRowElement.parentElement.getElementsByClassName("total-squad-points-destroyed")[0];
             var newTotalPointsDestroyed = 0;
             var pilotPointsElements = pilotRowElement.parentElement.getElementsByClassName("pilot-points-destroyed");
