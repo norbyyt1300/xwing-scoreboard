@@ -94,13 +94,26 @@
             var searchText = "";
             if (document.getElementById("squad1XWS").value != "") {
                 console.log("Saving squad 1 XWS to URL");
-                searchText += "squad1XWS=" + document.getElementById("squad1XWS").value;
+                searchText += "squad1XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad1XWS").value);
             }
             if (document.getElementById("squad2XWS").value != "") {
                 console.log("Saving squad 2 XWS to URL");
-                searchText += "&squad2XWS=" + document.getElementById("squad2XWS").value;
+                searchText += "&squad2XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad2XWS").value);
             }
             window.location.search = searchText;
+        }
+
+        function cleanSquadJSONBeforeSavingToURL(jsonString) {
+            return jsonString
+                .replace(/  /g, ' ')
+                .replace(/  /g, ' ')
+                .replace(/  /g, ' ')
+                .replace(/  /g, ' ')
+                .replace(/, "/g, ',"')
+                .replace(/{ /g, '{')
+                .replace(/\[ /g, '[')
+                .replace(/ }/g, '}')
+                .replace(/ ]/g, ']')
         }
 
         function showOrHideXWSFormElement() {
