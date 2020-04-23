@@ -136,7 +136,7 @@
                     var pilotRowHTML = "";
                     pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (squadJSON.pilots[i].name.charAt(0).toUpperCase() + squadJSON.pilots[i].name.substring(1)) + "</b> (" + squadJSON.pilots[i].ship + ")" + "</label></div>";
                     pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-input'><b>" + squadJSON.pilots[i].points + "</b> points (whole)</label></div>";
-                    pilotRowHTML += "<div class='col'><label class='col-form-label half-points-input'><b>" + squadJSON.pilots[i].points / 2 + "</b> points (halved)</label></div>";
+                    pilotRowHTML += "<div class='col'><label class='col-form-label half-points-input'><b>" + Math.ceil(squadJSON.pilots[i].points / 2) + "</b> points (halved)</label></div>";
                     pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePoints(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
                     pilotRowHTML += "<div class='col-sm-1' style='display: none;'><label class='col-form-label pilot-points-destroyed'>Points destroyed: <b>0</b></label></div>";
                     var pilotRow = document.createElement("div");
