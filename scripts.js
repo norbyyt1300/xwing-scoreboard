@@ -1,32 +1,45 @@
+
+
+// Check if there is XWS in the URL; if so, grab it, and drop it into the XWS forms
 var squad1XWS = "";
 var squad2XWS = "";
 if (window.location.search.indexOf('squad1XWS') != -1) {
     console.log("Importing squad 1 XWS from URL");
+    // Assume only 1 squad so far
     squad1XWS = window.location.search.split("squad1XWS=")[1];
 }
 if (window.location.search.indexOf('squad2XWS') != -1) {
     console.log("Importing squad 2 XWS from URL");
-    squad2XWS = squad1XWS.split("&squad2XWS=")[1]
+    // Since there are two squads worth of XWS, split the original var in half, and store each piece
     squad1XWS = squad1XWS.split("&squad2XWS=")[0];
+    squad2XWS = squad1XWS.split("&squad2XWS=")[1]
 }
 document.getElementById("squad1XWS").value = decodeURIComponent(squad1XWS);
 document.getElementById("squad2XWS").value = decodeURIComponent(squad2XWS);
 
+// When the save to URL is clicked
 function saveToURL() {
     var searchText = "";
+    // If there is XWS in a field...
     if (document.getElementById("squad1XWS").value != "") {
         console.log("Saving squad 1 XWS to URL");
+        // Add it to the search text (first cleanse the XWS)
         searchText += "squad1XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad1XWS").value);
     }
+    // Do this for both XWS fields
     if (document.getElementById("squad2XWS").value != "") {
         console.log("Saving squad 2 XWS to URL");
         searchText += "&squad2XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad2XWS").value);
     }
+    // Then actually commit the new search text to the URL, which will reload the page
     window.location.search = searchText;
 }
 
+// Before saving XWS to the URL
 function cleanSquadJSONBeforeSavingToURL(jsonString) {
+    // Parse the string to JSN (this'll clean formatting)
     var tempJSON = JSON.parse(jsonString);
+    // Check for potentially lengthy or unneeded properties, and delete them!
     if (tempJSON.vendor) {
         console.log("Removing vendor information when saving to URL...");
         delete tempJSON.vendor;
@@ -39,36 +52,32 @@ function cleanSquadJSONBeforeSavingToURL(jsonString) {
         console.log("Removing version information when saving to URL...");
         delete tempJSON.version;
     }
+    // Convert the JSON back into a string
     return JSON.stringify(tempJSON);
-    /*
-    return jsonString
-        .replace(/  /g, ' ')
-        .replace(/  /g, ' ')
-        .replace(/  /g, ' ')
-        .replace(/  /g, ' ')
-        .replace(/, "/g, ',"')
-        .replace(/{ /g, '{')
-        .replace(/\[ /g, '[')
-        .replace(/ }/g, '}')
-        .replace(/ ]/g, ']')
-        */
 }
 
+// When the menu button is toggled, show or hide the form
 function showOrHideXWSFormElement() {
+    // Grab the XWS form wrapper element
     var element = document.getElementById("xwsForm");
+    // if it is displayed...
     if ((element.style.display == "") || (element.style.display == "block")) {
+        // Set it to not display
         element.style.display = "none";
     } else {
+        // Otherwise, if it is not displayed, display it!
         element.style.display = "block";
     }
 }
 
+// Hide the form, then populate the top and bottom scoreboards
 function populateScoreboard() {
     document.getElementById("xwsForm").style.display = "none";
     populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
 }
 
+// Create the scoreboard for a squad
 function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squadNumber) {
     try {
         var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
@@ -103,6 +112,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
     }
 }
 
+// When a ship status select is changed!
 function updatePoints(selectElement) {
     var pilotRowElement = selectElement.parentElement.parentElement;
     var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed")[0];
