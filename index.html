@@ -15,20 +15,17 @@
     <style>
         #xwsForm {
             padding: 15px;
-            margin-top: 23px;
+            margin-top: 10px;
         }
         .total-squad-points-destroyed {
             text-align: right;
             font-weight: bold;
             margin-top: 10px;
         }
-        .total-squad-points {
-            text-align: right;
-            margin-top: 10px;
-        }
         .squad-form {
             padding: 15px;
             display: none;
+            margin-top: 10px;
         }
         .squad-1-color {
             background-color: lightcyan;
@@ -37,22 +34,29 @@
             background-color: lightpink;
         }
         #mainNavbar {
+            background-color: #101010;
+        }
+        body {
             background-color: #202020;
+        }
+        .container-fluid {
+            padding: 0px;
         }
 
     </style>
 </head>
 
-<body class="bg-dark">
+<body>
     <nav class="navbar navbar-dark" id="mainNavbar">
         <a class="navbar-brand" href="#">X-Wing Scoreboard</a>
-        <a type="submit" class="nav-item nav-link" href="https://raithos.github.io/"
-            target="_blank">🔗 YASB 2.0</a>
-        <a type="submit" class="nav-item nav-link" href="https://tabletop.to/" target="_blank">🔗 TTO</a>
         <a type="submit" class="btn btn-sm btn-dark text-light" onclick="showOrHideXWSFormElement()" id="showOrHideXWSFormButton">&#9776;</a>        
       </nav>
     <div class="container-fluid">
         <form id="xwsForm" class="bg-light">
+            <a type="button" class="btn btn-sm btn-info" href="https://raithos.github.io/" target="_blank">🔗 YASB 2.0</a>
+            <a type="button" class="btn btn-sm btn-info" href="https://tabletop.to/" target="_blank">🔗 TTO</a>
+            <br>
+            <br>
             <div class="form-group">
                 <label class="text-dark">Squad 1 XWS</label>
                 <input type="text" class="form-control squad-1-color" id="squad1XWS" placeholder="Paste Squad 1 XWS here">
@@ -61,16 +65,13 @@
                 <label class="text-dark">Squad 2 XWS</label>
                 <input type="text" class="form-control squad-2-color" id="squad2XWS" placeholder="Paste Squad 2 XWS here">
             </div>
-            <button type="button" class="btn btn-primary btn-sm btn-secondary" onclick="saveToURL()">Save squad(s) to URL</button>  
-            <button type="button" class="btn btn-primary btn-sm btn-danger" onclick="populateScoreboard()">Populate
-                Scoreboard</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="saveToURL()">Save to URL</button>  
+            <button type="button" class="btn btn-sm btn-danger" onclick="populateScoreboard()">GO</button>
             <br>
             <small>Then mouse-over a pilot in order to see a tool-tip showing that pilot's upgrades</small>
         </form>
-        <br>
         <form id="squad1Form" class="squad-form squad-1-color">
         </form>
-        <br>
         <form id="squad2Form" class="squad-form squad-2-color">
         </form>
     </div>
@@ -178,10 +179,6 @@
                 totalDestroyed.classList.add("total-squad-points-destroyed")
                 totalDestroyed.classList.add("text-danger")
                 squadFormElement.appendChild(totalDestroyed);
-                //var totalPoints = document.createElement("div");
-                //totalPoints.classList.add("total-squad-points")
-                //totalPoints.innerHTML = "Total initial squad points: " + squadJSON.points;
-                //squadFormElement.appendChild(totalPoints);
             } catch (err) {
                 console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
             }
