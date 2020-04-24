@@ -10,9 +10,10 @@ if (window.location.search.indexOf('squad1XWS') != -1) {
 }
 if (window.location.search.indexOf('squad2XWS') != -1) {
     console.log("Importing squad 2 XWS from URL");
-    // Since there are two squads worth of XWS, split the original var in half, and store each piece
-    squad1XWS = squad1XWS.split("&squad2XWS=")[0];
+    // Since there are two squads worth of XWS, split the original var in half, and store each piece (it has to be in this order!)
     squad2XWS = squad1XWS.split("&squad2XWS=")[1]
+    squad1XWS = squad1XWS.split("&squad2XWS=")[0];
+    
 }
 document.getElementById("squad1XWS").value = decodeURIComponent(squad1XWS);
 document.getElementById("squad2XWS").value = decodeURIComponent(squad2XWS);
@@ -80,28 +81,40 @@ function populateScoreboard() {
 // Create the scoreboard for a squad
 function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squadNumber) {
     try {
+        // Parse the squad JSON
         var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
         console.log("Squad JSON:", squadJSON);
+        // Get the squad form element, and make it visible
         var squadFormElement = document.getElementById(squadFormElementId);
         document.getElementById(squadFormElementId).style.display = "block";
+        // Prepare to make some inner HTML for the squad        
         squadFormElement.innerHTML = "";
-        //squadFormElement.innerHTML = "<h4>Squad " + squadNumber + "</h4>";
+        // For each pilot...
         for (var i = 0; i < squadJSON.pilots.length; i++) {
+            // Create tooltip text containing the pilot's upgrades!
             var toolTipText = "No upgrades";
             if (squadJSON.pilots[i].upgrades) {
                 toolTipText = "Upgrades:\n" + JSON.stringify(squadJSON.pilots[i].upgrades).replace(/"/g, '').replace(/{/g, '').replace(/}/g, '').replace(/\[/g, '').replace(/\],/g, '\n').replace(/\,/g, ', ').replace(/\:/g, ': ').replace("]", "");
             }
+            // Also, for each pilot, add:
             var pilotRowHTML = "";
+            // The pilot name and ship type
             pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (squadJSON.pilots[i].name.charAt(0).toUpperCase() + squadJSON.pilots[i].name.substring(1)) + "</b> (" + squadJSON.pilots[i].ship + ")" + "</label></div>";
-            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-input'><b>" + squadJSON.pilots[i].points + "</b> points (whole)</label></div>";
-            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-input'><b>" + Math.ceil(squadJSON.pilots[i].points / 2) + "</b> points (halved)</label></div>";
-            pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePoints(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
-            pilotRowHTML += "<div class='col-sm-1' style='display: none;'><label class='col-form-label pilot-points-destroyed'>Points destroyed: <b>0</b></label></div>";
+            // The pilot's whole points
+            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + squadJSON.pilots[i].points + "</span></b> points (whole)</label></div>";
+            // The pilot's half points
+            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(squadJSON.pilots[i].points / 2) + "</b> points (halved)</label></div>";
+            // A HIDDEN ELEMENT containing the current points destroyed for this pilot (it'll update later, and be used in calcs, too)
+            pilotRowHTML += "<div class='pilot-points-destroyed-hidden'>0</div>";
+            // A select for changing the ship status
+            pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePointsDestroyedForThisShipAndTotal(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
+            // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
             var pilotRow = document.createElement("div");
             pilotRow.classList.add("form-row")
             pilotRow.innerHTML = pilotRowHTML;
             squadFormElement.appendChild(pilotRow);
         }
+        // Now, for the whole squad, create a element to hold the total points and total destroyed
         var totalDestroyed = document.createElement("div");
         totalDestroyed.innerHTML = "Total squad points destroyed: <span class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
         totalDestroyed.classList.add("total-squad-points-destroyed")
@@ -113,16 +126,31 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
 }
 
 // When a ship status select is changed!
-function updatePoints(selectElement) {
-    var pilotRowElement = selectElement.parentElement.parentElement;
-    var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed")[0];
-    console.log(pilotRowElement);
-    pilotPointsdestroyedElement.innerHTML = "Points destroyed: <b>" + Math.ceil(selectElement.value * parseInt(pilotRowElement.getElementsByClassName("whole-points-input")[0].innerText.split(" ")[0])) + "</b>";
+function updatePointsDestroyedForThisShipAndTotal(shipStatusSelectElement) {
+    // Get this row
+    var pilotRowElement = shipStatusSelectElement.parentElement.parentElement;
+    // Calculate the points destroyed
+    var multiplier = shipStatusSelectElement.value;
+    var wholeShipPoints = parseInt(pilotRowElement.getElementsByClassName("whole-points-span")[0].innerText);
+    var pointsDestroyed = Math.ceil(multiplier * wholeShipPoints);
+    console.log("New pilot points destroyed: ", pointsDestroyed);
+    // Get the points destroyed element, and update its value
+    var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed-hidden")[0];
+    pilotPointsdestroyedElement.innerText = pointsDestroyed;
+    // Update the total points destroyed
+    updateTotalSquadPointsDestroyed(pilotRowElement.parentElement)
+}
+
+// Update the total points destroyed
+function updateTotalSquadPointsDestroyed(squadElement) {
+    //First, get all the pilot points destroyed elements
     var newTotalPointsDestroyed = 0;
-    var pilotPointsElements = pilotRowElement.parentElement.getElementsByClassName("pilot-points-destroyed");
-    for (var i = 0; i < pilotPointsElements.length; i++) {
-        newTotalPointsDestroyed += parseFloat(pilotPointsElements[i].innerText.replace("Points destroyed: ", ""));
+    var allPilotPointsElements = squadElement.getElementsByClassName("pilot-points-destroyed-hidden");
+    for (var i = 0; i < allPilotPointsElements.length; i++) {
+        // And add each pilots destroyed points to the total
+        newTotalPointsDestroyed += parseInt(allPilotPointsElements[i].innerText);
     }
-    var totalSquadPointsDestroyedSpanElement = pilotRowElement.parentElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
+    // Get the element containing the total points destroyed, and update its value
+    var totalSquadPointsDestroyedSpanElement = squadElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
     totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
 }
