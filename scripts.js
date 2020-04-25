@@ -83,7 +83,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
     try {
         // Parse the squad JSON
         var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
-        console.log("Squad JSON:", squadJSON);
+        console.log("Original JSON for squad " + squadNumber, squadJSON);
         // Get the squad form element, and make it visible
         var squadFormElement = document.getElementById(squadFormElementId);
         document.getElementById(squadFormElementId).style.display = "block";
@@ -110,7 +110,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePointsDestroyedForThisShipAndTotal(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
             var pilotRow = document.createElement("div");
-            pilotRow.classList.add("form-row")
+            pilotRow.classList.add("form-row");
+            pilotRow.classList.add("pilot-row");
             pilotRow.innerHTML = pilotRowHTML;
             squadFormElement.appendChild(pilotRow);
         }
@@ -120,6 +121,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         totalDestroyed.classList.add("total-squad-points-destroyed")
         totalDestroyed.classList.add("text-danger")
         squadFormElement.appendChild(totalDestroyed);
+        // Update the squad point possibilities
+        updateWinConditionPossibilitiesArray(squadFormElement);
     } catch (err) {
         console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
     }
@@ -144,22 +147,46 @@ function updatePointsDestroyedForThisShipAndTotal(shipStatusSelectElement) {
 }
 
 // Update the total points destroyed
-function updateTotalSquadPointsDestroyed(squadElement) {
+function updateTotalSquadPointsDestroyed(squadFormElement) {
     //First, get all the pilot points destroyed elements
     var newTotalPointsDestroyed = 0;
-    var allPilotPointsElements = squadElement.getElementsByClassName("pilot-points-destroyed-hidden");
+    var allPilotPointsElements = squadFormElement.getElementsByClassName("pilot-points-destroyed-hidden");
     for (var i = 0; i < allPilotPointsElements.length; i++) {
         // And add each pilots destroyed points to the total
         newTotalPointsDestroyed += parseInt(allPilotPointsElements[i].innerText);
     }
     // Get the element containing the total points destroyed, and update its value
-    var totalSquadPointsDestroyedSpanElement = squadElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
+    var totalSquadPointsDestroyedSpanElement = squadFormElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
     totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
 }
 
 // When a ship is updated, update the global array of point possibilities
 var squad1PointPossibilities = [];
 var squad2PointPossibilities = [];
-function updateTotalSquadPointsDestroyed(squadElement) {
-    
+function updateWinConditionPossibilitiesArray(squadFormElement) {
+    var newPossibilities = [];
+    // Loop through all rows
+    var allPilotRows = squadFormElement.getElementsByClassName("pilot-row");
+    for (var i = 0; i < allPilotRows.length; i++) {
+        // Add an object for the pilot name and its points
+        newPossibilities.push(
+            {
+                name: allPilotRows[i].innerText.split(" ")[0],
+                points: parseInt(allPilotRows[i].getElementsByClassName("pilot-points-destroyed-hidden")[0].innerText)
+            }
+        );
+    }
+    // Determine the squad, 1 or 2
+    var squadNumber = 1;
+    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
+        squadNumber = 2;
+    }
+    // Write the new possibilities to the squad
+    console.log("Updating point possibilities for squad", squadNumber);
+    if (squadNumber == 1) {
+        squad1PointPossibilities = newPossibilities;
+    } else {
+        squad2PointPossibilities = newPossibilities;
+    }
+    console.log("New point possibilities array for squad " + squadNumber, newPossibilities);
 }
