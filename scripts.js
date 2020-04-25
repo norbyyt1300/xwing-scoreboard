@@ -139,6 +139,8 @@ function updatePointsDestroyedForThisShipAndTotal(shipStatusSelectElement) {
     pilotPointsdestroyedElement.innerText = pointsDestroyed;
     // Update the total points destroyed
     updateTotalSquadPointsDestroyed(pilotRowElement.parentElement)
+    // Update the win con possibilities array
+    updateWinConditionPossibilitiesArray(pilotRowElement.parentElement);
 }
 
 // Update the total points destroyed
@@ -153,4 +155,11 @@ function updateTotalSquadPointsDestroyed(squadElement) {
     // Get the element containing the total points destroyed, and update its value
     var totalSquadPointsDestroyedSpanElement = squadElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
     totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
+}
+
+// When a ship is updated, update the global array of point possibilities
+var squad1PointPossibilities = [];
+var squad2PointPossibilities = [];
+function updateTotalSquadPointsDestroyed(squadElement) {
+    
 }
