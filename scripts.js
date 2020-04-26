@@ -104,10 +104,14 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + squadJSON.pilots[i].points + "</span></b> points (whole)</label></div>";
             // The pilot's half points
             pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(squadJSON.pilots[i].points / 2) + "</b> points (halved)</label></div>";
-            // A HIDDEN ELEMENT containing the current points destroyed for this pilot (it'll update later, and be used in calcs, too)
-            pilotRowHTML += "<div class='pilot-points-destroyed-hidden'>0</div>";
             // A select for changing the ship status
-            pilotRowHTML += "<div class='col-sm-2'><select class='form-control form-control-sm' onchange='updatePointsDestroyedForThisShipAndTotal(this)'><option value=0>Undamaged</option><option value=0.5>Halved</option><option value=1>Destroyed</option></select></div>";
+            pilotRowHTML += "<div class='col-sm-2'>" +
+                "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='updateTotalPointsDestroyedForThisSquad(this)'>" +
+                    "<option data-multiplier='0' value=0>Undamaged</option>" + 
+                    "<option data-multiplier='0.5' value=" + Math.ceil(squadJSON.pilots[i].points / 2) + ">Halved</option>" + 
+                    "<option data-multiplier='1' value=" + squadJSON.pilots[i].points + ">Destroyed</option>" +
+                "</select>" +
+            "</div>";
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
             var pilotRow = document.createElement("div");
             pilotRow.classList.add("form-row");
@@ -129,35 +133,21 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
 }
 
 // When a ship status select is changed!
-function updatePointsDestroyedForThisShipAndTotal(shipStatusSelectElement) {
-    // Get this row
-    var pilotRowElement = shipStatusSelectElement.parentElement.parentElement;
-    // Calculate the points destroyed
-    var multiplier = shipStatusSelectElement.value;
-    var wholeShipPoints = parseInt(pilotRowElement.getElementsByClassName("whole-points-span")[0].innerText);
-    var pointsDestroyed = Math.ceil(multiplier * wholeShipPoints);
-    console.log("New pilot points destroyed: ", pointsDestroyed);
-    // Get the points destroyed element, and update its value
-    var pilotPointsdestroyedElement = pilotRowElement.getElementsByClassName("pilot-points-destroyed-hidden")[0];
-    pilotPointsdestroyedElement.innerText = pointsDestroyed;
+function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     // Update the total points destroyed
-    updateTotalSquadPointsDestroyed(pilotRowElement.parentElement)
-    // Update the win con possibilities array
-    updateWinConditionPossibilitiesArray(pilotRowElement.parentElement);
-}
-
-// Update the total points destroyed
-function updateTotalSquadPointsDestroyed(squadFormElement) {
+    var squadFormElement = shipStatusSelectElement.parentElement.parentElement.parentElement;
     //First, get all the pilot points destroyed elements
     var newTotalPointsDestroyed = 0;
-    var allPilotPointsElements = squadFormElement.getElementsByClassName("pilot-points-destroyed-hidden");
-    for (var i = 0; i < allPilotPointsElements.length; i++) {
+    var allPilotPointsDestroyedSelectElements = squadFormElement.getElementsByClassName("pilot-points-destroyed-select");
+    for (var i = 0; i < allPilotPointsDestroyedSelectElements.length; i++) {
         // And add each pilots destroyed points to the total
-        newTotalPointsDestroyed += parseInt(allPilotPointsElements[i].innerText);
+        newTotalPointsDestroyed += parseInt(allPilotPointsDestroyedSelectElements[i].value);
     }
     // Get the element containing the total points destroyed, and update its value
     var totalSquadPointsDestroyedSpanElement = squadFormElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
-    totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
+    totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;    
+    // Update the win con possibilities array
+    updateWinConditionPossibilitiesArray(squadFormElement);
 }
 
 // When a ship is updated, update the global array of point possibilities
@@ -172,7 +162,7 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         newPossibilities.push(
             {
                 name: allPilotRows[i].innerText.split(" ")[0],
-                points: parseInt(allPilotRows[i].getElementsByClassName("pilot-points-destroyed-hidden")[0].innerText)
+                points: parseInt(allPilotRows[i].getElementsByClassName("pilot-points-destroyed-select")[0].value)
             }
         );
     }
