@@ -158,13 +158,32 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
     // Loop through all rows
     var allPilotRows = squadFormElement.getElementsByClassName("pilot-row");
     for (var i = 0; i < allPilotRows.length; i++) {
+        // Get the select element
+        var shipStatusSelectElement = allPilotRows[i].getElementsByClassName("pilot-points-destroyed-select")[0];
+        var pilotName = allPilotRows[i].innerText.split(" ")[0]
         // Add an object for the pilot name and its points
-        newPossibilities.push(
-            {
-                name: allPilotRows[i].innerText.split(" ")[0],
-                points: parseInt(allPilotRows[i].getElementsByClassName("pilot-points-destroyed-select")[0].value)
-            }
-        );
+        var status = shipStatusSelectElement.options[shipStatusSelectElement.selectedIndex].text;
+        // If the ship is undamaged, add halved and destroyed as future options
+        if (status == "Undamaged") {
+            newPossibilities.push({
+                name: pilotName,
+                points: shipStatusSelectElement.options[1].value,
+                status: "Halved"
+            });
+            newPossibilities.push({
+                name: pilotName,
+                points: shipStatusSelectElement.options[2].value,
+                status: "Destroyed"
+            });            
+        }
+        // If the ship is halved, add destroyed as an option
+        if (status == "Halved") {
+            newPossibilities.push({
+                name: pilotName,
+                points: shipStatusSelectElement.options[2].value,
+                status: "Destroyed"
+            });   
+        }
     }
     // Determine the squad, 1 or 2
     var squadNumber = 1;
