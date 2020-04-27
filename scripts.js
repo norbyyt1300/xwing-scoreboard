@@ -78,6 +78,17 @@ function populateScoreboard() {
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
 }
 
+// Function for sorting objects by points
+function comparePoints(a, b) {
+    let comparison = 0;
+    if (a.points > b.points) {
+      comparison = 1;
+    } else if (a.points < b.points) {
+      comparison = -1;
+    }
+    return comparison * -1;
+}
+
 // Create the scoreboard for a squad
 function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squadNumber) {
     try {
@@ -89,27 +100,29 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         document.getElementById(squadFormElementId).style.display = "block";
         // Prepare to make some inner HTML for the squad        
         squadFormElement.innerHTML = "";
+        // Sort the pilots by points!
+        var pilots = squadJSON.pilots.sort(comparePoints);
         // For each pilot...
-        for (var i = 0; i < squadJSON.pilots.length; i++) {
+        for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
             var toolTipText = "No upgrades";
-            if (squadJSON.pilots[i].upgrades) {
-                toolTipText = "Upgrades:\n" + JSON.stringify(squadJSON.pilots[i].upgrades).replace(/"/g, '').replace(/{/g, '').replace(/}/g, '').replace(/\[/g, '').replace(/\],/g, '\n').replace(/\,/g, ', ').replace(/\:/g, ': ').replace("]", "");
+            if (pilots[i].upgrades) {
+                toolTipText = "Upgrades:\n" + JSON.stringify(pilots[i].upgrades).replace(/"/g, '').replace(/{/g, '').replace(/}/g, '').replace(/\[/g, '').replace(/\],/g, '\n').replace(/\,/g, ', ').replace(/\:/g, ': ').replace("]", "");
             }
             // Also, for each pilot, add:
             var pilotRowHTML = "";
             // The pilot name and ship type
-            pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (squadJSON.pilots[i].name.charAt(0).toUpperCase() + squadJSON.pilots[i].name.substring(1)) + "</b> (" + squadJSON.pilots[i].ship + ")" + "</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (pilots[i].name.charAt(0).toUpperCase() + pilots[i].name.substring(1)) + "</b> (" + pilots[i].ship + ")" + "</label></div>";
             // The pilot's whole points
-            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + squadJSON.pilots[i].points + "</span></b> points (whole)</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + pilots[i].points + "</span></b> points (whole)</label></div>";
             // The pilot's half points
-            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(squadJSON.pilots[i].points / 2) + "</b> points (halved)</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(pilots[i].points / 2) + "</b> points (halved)</label></div>";
             // A select for changing the ship status
             pilotRowHTML += "<div class='col-sm-2'>" +
                 "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='updateTotalPointsDestroyedForThisSquad(this)'>" +
                     "<option data-multiplier='0' value=0>Undamaged</option>" + 
-                    "<option data-multiplier='0.5' value=" + Math.ceil(squadJSON.pilots[i].points / 2) + ">Halved</option>" + 
-                    "<option data-multiplier='1' value=" + squadJSON.pilots[i].points + ">Destroyed</option>" +
+                    "<option data-multiplier='0.5' value=" + Math.ceil(pilots[i].points / 2) + ">Halved</option>" + 
+                    "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed</option>" +
                 "</select>" +
             "</div>";
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
@@ -167,6 +180,11 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         if (status == "Undamaged") {
             newPossibilities.push({
                 name: pilotName,
+                points: 0,
+                status: "Undamaged"
+            });            
+            newPossibilities.push({
+                name: pilotName,
                 points: shipStatusSelectElement.options[1].value,
                 status: "Halved"
             });
@@ -180,10 +198,22 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         if (status == "Halved") {
             newPossibilities.push({
                 name: pilotName,
+                points: shipStatusSelectElement.options[1].value,
+                status: "Halved"
+            });
+            newPossibilities.push({
+                name: pilotName,
                 points: shipStatusSelectElement.options[2].value,
                 status: "Destroyed"
-            });   
+            });     
         }
+        if (status == "Destroyed") {
+            newPossibilities.push({
+                name: pilotName,
+                points: shipStatusSelectElement.options[2].value,
+                status: "Destroyed"
+            });     
+        }        
     }
     // Determine the squad, 1 or 2
     var squadNumber = 1;
