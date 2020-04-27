@@ -79,14 +79,24 @@ function populateScoreboard() {
 }
 
 // Function for sorting objects by points
-function comparePoints(a, b) {
+function comparePointsBigToSmall(a, b) {
     let comparison = 0;
     if (a.points > b.points) {
         comparison = 1;
     } else if (a.points < b.points) {
         comparison = -1;
     }
-    return comparison * -1;
+    return comparison;
+}
+
+function comparePointsSmallToBig(a, b) {
+    let comparison = 0;
+    if (a.points > b.points) {
+        comparison = 1;
+    } else if (a.points < b.points) {
+        comparison = -1;
+    }
+    return comparison;
 }
 
 // Create the scoreboard for a squad
@@ -101,7 +111,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         // Prepare to make some inner HTML for the squad        
         squadFormElement.innerHTML = "";
         // Sort the pilots by points!
-        var pilots = squadJSON.pilots.sort(comparePoints);
+        var pilots = squadJSON.pilots.sort(comparePointsBigToSmall);
         // For each pilot...
         for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
@@ -146,6 +156,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
 }
 
 // When a ship status select is changed!
+var squad1PointsDestroyed = 0;
+var squad2PointsDestroyed = 0;
 function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     // Update the total points destroyed
     var squadFormElement = shipStatusSelectElement.parentElement.parentElement.parentElement;
@@ -159,6 +171,12 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     // Get the element containing the total points destroyed, and update its value
     var totalSquadPointsDestroyedSpanElement = squadFormElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
     totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
+    // Determine the squad, 1 or 2, and update total pts destroyed global var
+    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
+        squad2PointsDestroyed = newTotalPointsDestroyed;
+    } else {
+        squad1PointsDestroyed = newTotalPointsDestroyed;
+    }
     // Update the win con possibilities array
     updateWinConditionPossibilitiesArray(squadFormElement);
 }
@@ -166,13 +184,21 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
 // When a ship is updated, update the global array of point possibilities
 var squad1PointPossibilities = [];
 var squad2PointPossibilities = [];
-var squad1PointsDestroyed = 0;
-var squad2PointsDestroyed = 0;
+var squad1WinConditions = [];
+var squad2WinConditions = [];
 function updateWinConditionPossibilitiesArray(squadFormElement) {
-    var newPossibilities = [];
-    // Loop through all rows
+    // Determine the squad, 1 or 2, and update total pts destroyed
+    var squadNumber = 1;
+    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
+        squadNumber = 2;
+    }
+    // Get all pilots in this squad
     var allPilotRows = squadFormElement.getElementsByClassName("pilot-row");
+    // Create an array of arrays, with one array for each pilot
+    var arrayOfAllPilotPossibilityArrays = [];
+    // Now that there is an array for each pilot, for each pilot array, add their possibilities
     for (var i = 0; i < allPilotRows.length; i++) {
+        var pilotArray = [];
         // Get the select element
         var shipStatusSelectElement = allPilotRows[i].getElementsByClassName("pilot-points-destroyed-select")[0];
         var pilotName = allPilotRows[i].innerText.split(" ")[0]
@@ -180,17 +206,17 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         var status = shipStatusSelectElement.options[shipStatusSelectElement.selectedIndex].text;
         // If the ship is undamaged, add halved and destroyed as future options
         if (status == "Undamaged") {
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: 0,
                 status: "Undamaged"
             });
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[1].value),
                 status: "Halved"
             });
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
@@ -198,12 +224,12 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         }
         // If the ship is halved, add destroyed as an option
         if (status == "Halved") {
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[1].value),
                 status: "Halved"
             });
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
@@ -211,36 +237,77 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         }
         // Finally, add destroyed
         if (status == "Destroyed") {
-            newPossibilities.push({
+            pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
             });
         }
+        // Add this pilot to the possibility array
+        arrayOfAllPilotPossibilityArrays.push(pilotArray);
     }
-    // Determine the squad, 1 or 2
-    var squadNumber = 1;
-    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
-        squadNumber = 2;
-    }
-    // Write the new possibilities to the squad
-    console.log("Updating point possibilities for squad", squadNumber);
+    // Get the combinations
+    var combinations = cartesian(arrayOfAllPilotPossibilityArrays);
+    console.log("Combinations for squad " + squadNumber, combinations);
     if (squadNumber == 1) {
-        squad1PointPossibilities = newPossibilities;
-        squad1PointsDestroyed = parseInt(document.getElementById("squad-1-total-squad-points-destroyed").innerText);
+        squad1PointPossibilities = combinations;
+        console.log("Calculating win conditions for squad 1");
+        squad1WinConditions = [];
+        // Loop through all possibilities for squad 2, and see where the combo is over squad 1's pts destroyed
+        for (var i = 0; i < squad2PointPossibilities.length; i++) {
+            var possibility = squad2PointPossibilities[i];
+            var totalPointsDestroyedForThisPossibility = sumPoints(possibility);
+            if (totalPointsDestroyedForThisPossibility > squad1PointsDestroyed) {
+                squad1WinConditions.push({
+                    points: totalPointsDestroyedForThisPossibility,
+                    pilots: possibility
+                });
+            }
+        }   
+        squad1WinConditions = squad1WinConditions.sort(comparePointsSmallToBig);
+        console.log("Squad 1 win conditions:", squad1WinConditions);     
     } else {
-        squad2PointPossibilities = newPossibilities;
-        squad2PointsDestroyed = parseInt(document.getElementById("squad-2-total-squad-points-destroyed").innerText);
-    }   
-    console.log("Squad 1 points destroyed: ", squad1PointsDestroyed);
-    console.log("Squad 2 points destroyed: ", squad2PointsDestroyed);
-    console.log("New point possibilities array for squad " + squadNumber, newPossibilities);
-    // Calculate win cons
-    updateWinConditions();
+        squad2PointPossibilities = combinations;
+        console.log("Calculating win conditions for squad 2");
+        squad2WinConditions = [];
+        // Loop through all possibilities for squad 1, and see where the combo is over squad 2's pts destroyed
+        for (var j = 0; j < squad1PointPossibilities.length; j++) {
+            var possibility = squad1PointPossibilities[j];
+            var totalPointsDestroyedForThisPossibility = sumPoints(possibility);
+            if (totalPointsDestroyedForThisPossibility > squad2PointsDestroyed) {
+                squad2WinConditions.push({
+                    points: totalPointsDestroyedForThisPossibility,
+                    pilots: possibility
+                });
+            }
+        }    
+        squad2WinConditions = squad2WinConditions.sort(comparePointsSmallToBig);
+        console.log("Squad 2 win conditions:", squad2WinConditions);    
+    }
 }
 
-// Calculate win cons
-function updateWinConditions() {
-    console.log("Updating win conditions");
-    
+// See https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
+function cartesian(arg) {
+    var r = [], max = arg.length-1;
+    function helper(arr, i) {
+        for (var j=0, l=arg[i].length; j<l; j++) {
+            var a = arr.slice(0); // clone arr
+            a.push(arg[i][j]);
+            if (i==max)
+                r.push(a);
+            else
+                helper(a, i+1);
+        }
+    }
+    helper([], 0);
+    return r;
 }
+
+// Sum points for a list of objects with point properties
+function sumPoints(objectList){
+    var points = 0;
+    for (var i = 0; i < objectList.length; i++) {
+        points += objectList[i].points;
+    }
+    return points;
+};
