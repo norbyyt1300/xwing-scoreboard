@@ -13,7 +13,7 @@ if (window.location.search.indexOf('squad2XWS') != -1) {
     // Since there are two squads worth of XWS, split the original var in half, and store each piece (it has to be in this order!)
     squad2XWS = squad1XWS.split("&squad2XWS=")[1]
     squad1XWS = squad1XWS.split("&squad2XWS=")[0];
-    
+
 }
 document.getElementById("squad1XWS").value = decodeURIComponent(squad1XWS);
 document.getElementById("squad2XWS").value = decodeURIComponent(squad2XWS);
@@ -82,9 +82,9 @@ function populateScoreboard() {
 function comparePoints(a, b) {
     let comparison = 0;
     if (a.points > b.points) {
-      comparison = 1;
+        comparison = 1;
     } else if (a.points < b.points) {
-      comparison = -1;
+        comparison = -1;
     }
     return comparison * -1;
 }
@@ -120,11 +120,11 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             // A select for changing the ship status
             pilotRowHTML += "<div class='col-sm-2'>" +
                 "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='updateTotalPointsDestroyedForThisSquad(this)'>" +
-                    "<option data-multiplier='0' value=0>Undamaged</option>" + 
-                    "<option data-multiplier='0.5' value=" + Math.ceil(pilots[i].points / 2) + ">Halved</option>" + 
-                    "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed</option>" +
+                "<option data-multiplier='0' value=0>Undamaged</option>" +
+                "<option data-multiplier='0.5' value=" + Math.ceil(pilots[i].points / 2) + ">Halved</option>" +
+                "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed</option>" +
                 "</select>" +
-            "</div>";
+                "</div>";
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
             var pilotRow = document.createElement("div");
             pilotRow.classList.add("form-row");
@@ -134,7 +134,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         }
         // Now, for the whole squad, create a element to hold the total points and total destroyed
         var totalDestroyed = document.createElement("div");
-        totalDestroyed.innerHTML = "Total squad points destroyed: <span class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
+        totalDestroyed.innerHTML = "Total squad points destroyed: <span id='squad-" + squadNumber + "-total-squad-points-destroyed' class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
         totalDestroyed.classList.add("total-squad-points-destroyed")
         totalDestroyed.classList.add("text-danger")
         squadFormElement.appendChild(totalDestroyed);
@@ -158,7 +158,7 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     }
     // Get the element containing the total points destroyed, and update its value
     var totalSquadPointsDestroyedSpanElement = squadFormElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
-    totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;    
+    totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
     // Update the win con possibilities array
     updateWinConditionPossibilitiesArray(squadFormElement);
 }
@@ -166,6 +166,8 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
 // When a ship is updated, update the global array of point possibilities
 var squad1PointPossibilities = [];
 var squad2PointPossibilities = [];
+var squad1PointsDestroyed = 0;
+var squad2PointsDestroyed = 0;
 function updateWinConditionPossibilitiesArray(squadFormElement) {
     var newPossibilities = [];
     // Loop through all rows
@@ -182,38 +184,39 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
                 name: pilotName,
                 points: 0,
                 status: "Undamaged"
-            });            
+            });
             newPossibilities.push({
                 name: pilotName,
-                points: shipStatusSelectElement.options[1].value,
+                points: parseInt(shipStatusSelectElement.options[1].value),
                 status: "Halved"
             });
             newPossibilities.push({
                 name: pilotName,
-                points: shipStatusSelectElement.options[2].value,
+                points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
-            });            
+            });
         }
         // If the ship is halved, add destroyed as an option
         if (status == "Halved") {
             newPossibilities.push({
                 name: pilotName,
-                points: shipStatusSelectElement.options[1].value,
+                points: parseInt(shipStatusSelectElement.options[1].value),
                 status: "Halved"
             });
             newPossibilities.push({
                 name: pilotName,
-                points: shipStatusSelectElement.options[2].value,
+                points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
-            });     
+            });
         }
+        // Finally, add destroyed
         if (status == "Destroyed") {
             newPossibilities.push({
                 name: pilotName,
-                points: shipStatusSelectElement.options[2].value,
+                points: parseInt(shipStatusSelectElement.options[2].value),
                 status: "Destroyed"
-            });     
-        }        
+            });
+        }
     }
     // Determine the squad, 1 or 2
     var squadNumber = 1;
@@ -224,8 +227,20 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
     console.log("Updating point possibilities for squad", squadNumber);
     if (squadNumber == 1) {
         squad1PointPossibilities = newPossibilities;
+        squad1PointsDestroyed = parseInt(document.getElementById("squad-1-total-squad-points-destroyed").innerText);
     } else {
         squad2PointPossibilities = newPossibilities;
-    }
+        squad2PointsDestroyed = parseInt(document.getElementById("squad-2-total-squad-points-destroyed").innerText);
+    }   
+    console.log("Squad 1 points destroyed: ", squad1PointsDestroyed);
+    console.log("Squad 2 points destroyed: ", squad2PointsDestroyed);
     console.log("New point possibilities array for squad " + squadNumber, newPossibilities);
+    // Calculate win cons
+    updateWinConditions();
+}
+
+// Calculate win cons
+function updateWinConditions() {
+    console.log("Updating win conditions");
+    
 }
