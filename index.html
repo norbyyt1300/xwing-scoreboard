@@ -39,8 +39,8 @@
                     placeholder="Paste Squad 2 XWS here">
             </div>
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="showWinConditions">
-                <!-- <label class="form-check-label">Show win conditions (beta)</label> -->
+                <input type="checkbox" class="form-check-input" id="showWinConditions" onclick="showOrHideWinConditions()">
+                <label class="form-check-label">Show win conditions (beta)</label>
             </div>
             <br>
             <button type="button" class="btn btn-sm btn-secondary" onclick="saveToURL()">Save to URL</button>
@@ -54,6 +54,7 @@
         </form>
         <form id="squad2Form" class="squad-form squad-2-color">
         </form>
+        <div id='win-conditions' class='text-light'></div>
     </div>
 
     <!-- Optional JavaScript -->

@@ -260,12 +260,14 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
             if (totalPointsDestroyedForThisPossibility > squad1PointsDestroyed) {
                 squad1WinConditions.push({
                     points: totalPointsDestroyedForThisPossibility,
-                    pilots: possibility
+                    pilots: possibility,
+                    formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
                 });
             }
         }   
         squad1WinConditions = squad1WinConditions.sort(comparePointsSmallToBig);
         console.log("Squad 1 win conditions:", squad1WinConditions);     
+        displayPossibilities();
     } else {
         squad2PointPossibilities = combinations;
         console.log("Calculating win conditions for squad 2");
@@ -277,13 +279,37 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
             if (totalPointsDestroyedForThisPossibility > squad2PointsDestroyed) {
                 squad2WinConditions.push({
                     points: totalPointsDestroyedForThisPossibility,
-                    pilots: possibility
+                    pilots: possibility,
+                    formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
                 });
             }
         }    
         squad2WinConditions = squad2WinConditions.sort(comparePointsSmallToBig);
         console.log("Squad 2 win conditions:", squad2WinConditions);    
+        displayPossibilities();
     }
+}
+
+function formatPossibility(points, pilots) {
+    var formattedPossibility = "Points: " + points;
+    for (var i = 0; i < pilots.length; i++) {
+        formattedPossibility += (", <b>" + pilots[i].name + "</b> (" + pilots[i].status + ", " + pilots[i].points + ")");
+    }
+    return formattedPossibility;
+}
+
+function displayPossibilities() {
+    var element = document.getElementById("win-conditions");
+    var newHTML = "";
+    newHTML += "<h4>Squad 1 Win Conditions (count: " + squad1WinConditions.length + "):</h4>";
+    for (var i = 0; i < squad1WinConditions.length; i++) {
+        newHTML += (squad1WinConditions[i]["formattedString"] + "<br>");
+    }
+    newHTML += "<br><h4>Squad 2 Win Conditions (count: " + squad2WinConditions.length + "):</h4>";
+    for (var j = 0; j < squad2WinConditions.length; j++) {
+        newHTML += (squad2WinConditions[j]["formattedString"] + "<br>");
+    }
+    element.innerHTML = newHTML;
 }
 
 // See https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
@@ -311,3 +337,16 @@ function sumPoints(objectList){
     }
     return points;
 };
+
+function showOrHideWinConditions() {
+    // Grab the XWS form wrapper element
+    var element = document.getElementById("win-conditions");
+    // if it is displayed...
+    if (element.style.display == "block") {
+        // Set it to not display
+        element.style.display = "none";
+    } else {
+        // Otherwise, if it is not displayed, display it!
+        element.style.display = "block";
+    }
+}
