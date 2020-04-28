@@ -41,3 +41,6 @@ body {
     background-color: darkslategray;
     display: none;
 }
+.win-cons-table {
+    width: 100%;
+}

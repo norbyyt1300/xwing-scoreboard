@@ -11,7 +11,7 @@ if (window.location.search.indexOf('squad1XWS') != -1) {
 if (window.location.search.indexOf('squad2XWS') != -1) {
     console.log("Importing squad 2 XWS from URL");
     // Since there are two squads worth of XWS, split the original var in half, and store each piece (it has to be in this order!)
-    squad2XWS = squad1XWS.split("&squad2XWS=")[1]
+    squad2XWS = squad1XWS.split("&squad2XWS=")[1];
     squad1XWS = squad1XWS.split("&squad2XWS=")[0];
 
 }
@@ -76,6 +76,8 @@ function populateScoreboard() {
     document.getElementById("xwsForm").style.display = "none";
     populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
+    // Added to force execution of squad 1 win cons after squad 2 is populated
+    updateWinConditionPossibilitiesArray(document.getElementById("squad1Form"));
 }
 
 // Function for sorting objects by points
@@ -145,8 +147,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         // Now, for the whole squad, create a element to hold the total points and total destroyed
         var totalDestroyed = document.createElement("div");
         totalDestroyed.innerHTML = "Total squad points destroyed: <span id='squad-" + squadNumber + "-total-squad-points-destroyed' class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
-        totalDestroyed.classList.add("total-squad-points-destroyed")
-        totalDestroyed.classList.add("text-danger")
+        totalDestroyed.classList.add("total-squad-points-destroyed");
+        totalDestroyed.classList.add("text-danger");
         squadFormElement.appendChild(totalDestroyed);
         // Update the squad point possibilities
         updateWinConditionPossibilitiesArray(squadFormElement);
@@ -201,7 +203,7 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         var pilotArray = [];
         // Get the select element
         var shipStatusSelectElement = allPilotRows[i].getElementsByClassName("pilot-points-destroyed-select")[0];
-        var pilotName = allPilotRows[i].innerText.split(" ")[0]
+        var pilotName = allPilotRows[i].innerText.split(" ")[0];
         // Add an object for the pilot name and its points
         var status = shipStatusSelectElement.options[shipStatusSelectElement.selectedIndex].text;
         // If the ship is undamaged, add halved and destroyed as future options
@@ -249,45 +251,38 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
     // Get the combinations
     var combinations = cartesian(arrayOfAllPilotPossibilityArrays);
     console.log("Combinations for squad " + squadNumber, combinations);
+    console.log("Calculating win conditions for squad " + squadNumber);
     if (squadNumber == 1) {
         squad1PointPossibilities = combinations;
-        console.log("Calculating win conditions for squad 1");
-        squad1WinConditions = [];
-        // Loop through all possibilities for squad 2, and see where the combo is over squad 1's pts destroyed
-        for (var i = 0; i < squad2PointPossibilities.length; i++) {
-            var possibility = squad2PointPossibilities[i];
-            var totalPointsDestroyedForThisPossibility = sumPoints(possibility);
-            if (totalPointsDestroyedForThisPossibility > squad1PointsDestroyed) {
-                squad1WinConditions.push({
-                    points: totalPointsDestroyedForThisPossibility,
-                    pilots: possibility,
-                    formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
-                });
-            }
-        }   
-        squad1WinConditions = squad1WinConditions.sort(comparePointsSmallToBig);
+        squad1WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad2PointPossibilities, squad1PointsDestroyed);
         console.log("Squad 1 win conditions:", squad1WinConditions);     
-        displayPossibilities();
     } else {
         squad2PointPossibilities = combinations;
-        console.log("Calculating win conditions for squad 2");
-        squad2WinConditions = [];
+        squad2WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad1PointPossibilities, squad2PointsDestroyed);
+        console.log("Squad 2 win conditions:", squad2WinConditions);    
+    }
+    // Display the results on the page
+    displayPossibilities();
+}
+
+function getPossibilitiesThatExceedPointsDestroyed(possibilities, pointsDestroyed) {
+    var winConditions = [];
         // Loop through all possibilities for squad 1, and see where the combo is over squad 2's pts destroyed
-        for (var j = 0; j < squad1PointPossibilities.length; j++) {
-            var possibility = squad1PointPossibilities[j];
+        for (var j = 0; j < possibilities.length; j++) {
+            var possibility = possibilities[j];
             var totalPointsDestroyedForThisPossibility = sumPoints(possibility);
             if (totalPointsDestroyedForThisPossibility > squad2PointsDestroyed) {
-                squad2WinConditions.push({
+                winConditions.push({
                     points: totalPointsDestroyedForThisPossibility,
                     pilots: possibility,
+                    // Format the possibility in HTML
                     formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
                 });
             }
         }    
-        squad2WinConditions = squad2WinConditions.sort(comparePointsSmallToBig);
-        console.log("Squad 2 win conditions:", squad2WinConditions);    
-        displayPossibilities();
-    }
+        // Sort
+        winConditions = winConditions.sort(comparePointsSmallToBig);    
+        return winConditions;
 }
 
 function formatPossibility(points, pilots) {
@@ -298,17 +293,31 @@ function formatPossibility(points, pilots) {
     return formattedPossibility;
 }
 
+function formatPossibilityAsTableRow(points, pilots) {
+    var formattedPossibility = "<tr>";
+    formattedPossibility += "<td>Points: <b>" + points + "</b></td>";
+    for (var i = 0; i < pilots.length; i++) {
+        formattedPossibility += ("<td><b>" + pilots[i].name + "</b> (" + pilots[i].status + ", " + pilots[i].points + ")</td>");
+    }
+    formattedPossibility += "</tr>";
+    return formattedPossibility;
+}
+
 function displayPossibilities() {
     var element = document.getElementById("win-conditions");
     var newHTML = "";
     newHTML += "<h4>Squad 1 Win Conditions (count: " + squad1WinConditions.length + "):</h4>";
+    newHTML += "<table class='win-cons-table'>";
     for (var i = 0; i < squad1WinConditions.length; i++) {
-        newHTML += (squad1WinConditions[i]["formattedString"] + "<br>");
+        newHTML += formatPossibilityAsTableRow(squad1WinConditions[i].points, squad1WinConditions[i].pilots);
     }
+    newHTML += "</table>";
     newHTML += "<br><h4>Squad 2 Win Conditions (count: " + squad2WinConditions.length + "):</h4>";
+    newHTML += "<table class='win-cons-table'>";
     for (var j = 0; j < squad2WinConditions.length; j++) {
-        newHTML += (squad2WinConditions[j]["formattedString"] + "<br>");
+        newHTML += formatPossibilityAsTableRow(squad2WinConditions[j].points, squad2WinConditions[j].pilots);
     }
+    newHTML += "</table>";
     element.innerHTML = newHTML;
 }
 
@@ -330,13 +339,13 @@ function cartesian(arg) {
 }
 
 // Sum points for a list of objects with point properties
-function sumPoints(objectList){
+function sumPoints(objectList) {
     var points = 0;
     for (var i = 0; i < objectList.length; i++) {
         points += objectList[i].points;
     }
     return points;
-};
+}
 
 function showOrHideWinConditions() {
     // Grab the XWS form wrapper element
