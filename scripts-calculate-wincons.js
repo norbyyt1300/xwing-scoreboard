@@ -84,6 +84,26 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
 }
 
 // ------------------------------------------------------------------
+// See https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
+// ------------------------------------------------------------------
+
+function cartesian(arg) {
+    var r = [], max = arg.length-1;
+    function helper(arr, i) {
+        for (var j=0, l=arg[i].length; j<l; j++) {
+            var a = arr.slice(0); // clone arr
+            a.push(arg[i][j]);
+            if (i==max)
+                r.push(a);
+            else
+                helper(a, i+1);
+        }
+    }
+    helper([], 0);
+    return r;
+}
+
+// ------------------------------------------------------------------
 // Filter to only show winning possibilities
 // ------------------------------------------------------------------
 
@@ -105,74 +125,6 @@ function getPossibilitiesThatExceedPointsDestroyed(possibilities, pointsDestroye
         // Sort
         winConditions = winConditions.sort(comparePointsSmallToBig);    
         return winConditions;
-}
-
-// ------------------------------------------------------------------
-// Format single a possibility as simple HTML
-// ------------------------------------------------------------------
-
-function formatPossibility(points, pilots) {
-    var formattedPossibility = "Points: " + points;
-    for (var i = 0; i < pilots.length; i++) {
-        formattedPossibility += (", <b>" + pilots[i].name + "</b> (" + pilots[i].status + ", " + pilots[i].points + ")");
-    }
-    return formattedPossibility;
-}
-
-// ------------------------------------------------------------------
-// Format a possibility as HTML for a table row
-// ------------------------------------------------------------------
-
-function formatPossibilityAsTableRow(points, pilots) {
-    var formattedPossibility = "<tr>";
-    formattedPossibility += "<td>Points: <b>" + points + "</b></td>";
-    for (var i = 0; i < pilots.length; i++) {
-        formattedPossibility += ("<td><b>" + pilots[i].name + "</b> (" + pilots[i].status + ", " + pilots[i].points + ")</td>");
-    }
-    formattedPossibility += "</tr>";
-    return formattedPossibility;
-}
-
-// ------------------------------------------------------------------
-// Display the possibilities on the page
-// ------------------------------------------------------------------
-
-function displayPossibilities() {
-    var element = document.getElementById("win-conditions");
-    var newHTML = "";
-    newHTML += "<h4>Squad 1 Win Conditions (count: " + squad1WinConditions.length + "):</h4>";
-    newHTML += "<table class='win-cons-table'>";
-    for (var i = 0; i < squad1WinConditions.length; i++) {
-        newHTML += formatPossibilityAsTableRow(squad1WinConditions[i].points, squad1WinConditions[i].pilots);
-    }
-    newHTML += "</table>";
-    newHTML += "<br><h4>Squad 2 Win Conditions (count: " + squad2WinConditions.length + "):</h4>";
-    newHTML += "<table class='win-cons-table'>";
-    for (var j = 0; j < squad2WinConditions.length; j++) {
-        newHTML += formatPossibilityAsTableRow(squad2WinConditions[j].points, squad2WinConditions[j].pilots);
-    }
-    newHTML += "</table>";
-    element.innerHTML = newHTML;
-}
-
-// ------------------------------------------------------------------
-// See https://stackoverflow.com/questions/15298912/javascript-generating-combinations-from-n-arrays-with-m-elements
-// ------------------------------------------------------------------
-
-function cartesian(arg) {
-    var r = [], max = arg.length-1;
-    function helper(arr, i) {
-        for (var j=0, l=arg[i].length; j<l; j++) {
-            var a = arr.slice(0); // clone arr
-            a.push(arg[i][j]);
-            if (i==max)
-                r.push(a);
-            else
-                helper(a, i+1);
-        }
-    }
-    helper([], 0);
-    return r;
 }
 
 // ------------------------------------------------------------------
