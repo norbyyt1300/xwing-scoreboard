@@ -15,6 +15,7 @@ function showOrHideWinConditions() {
     }
 }
 
+/*
 // ------------------------------------------------------------------
 // Format single a possibility as simple HTML
 // ------------------------------------------------------------------
@@ -61,4 +62,86 @@ function displayPossibilities() {
     }
     newHTML += "</table>";
     element.innerHTML = newHTML;
+}
+*/
+
+// ------------------------------------------------------------------
+// Display the possibilities on the page using Datatables
+// ------------------------------------------------------------------
+
+function displayPossibilitiesUsingDatatables() { 
+
+    // Initialize empty arrays
+    var squad1WinConditions_forDataTables = [];
+    var squad2WinConditions_forDataTables = [];
+
+    // Create column headers
+    var squad1WinConditionsColumns = createDataTablesColumnHeaders(squad2NumberOfPilots);
+    var squad2WinConditionsColumns = createDataTablesColumnHeaders(squad1NumberOfPilots);
+
+    // Loop through the win con possibilities and reformat the data to make it suitable for datatables
+    var squad1WinConditions_forDataTables = createDataTablesDataset(squad1WinConditions);
+    var squad2WinConditions_forDataTables = createDataTablesDataset(squad2WinConditions);
+
+    // Log to console
+    console.log("Squad 1 win cons data set for datatables:", squad1WinConditions_forDataTables);
+    console.log("Squad 2 win cons data set for datatables:", squad2WinConditions_forDataTables);
+
+    // Create the tables
+    if (squad1WinConditions_forDataTables.length > 0) {
+        $('#squad1WinConditions').DataTable( {
+            destroy: true,
+            data: squad1WinConditions_forDataTables,
+            columns: squad1WinConditionsColumns
+        } );
+    } else { 
+        console.log("Not creating datatable; squad 1 win cons was empty.");
+    }
+    if (squad2WinConditions_forDataTables.length > 0) {
+        $('#squad2WinConditions').DataTable( {
+            destroy: true,
+            data: squad2WinConditions_forDataTables,
+            columns: squad2WinConditionsColumns
+        } );
+    } else { 
+        console.log("Not creating datatable; squad 2 win cons was empty.");
+    }
+}
+
+// ------------------------------------------------------------------
+// Create Datatables column headers
+// ------------------------------------------------------------------
+
+function createDataTablesColumnHeaders(numberOfPilots) {
+    console.log("Creating columns for a squad with this many pilots:", numberOfPilots);
+    var columns = [{ title: "Total Points Destroyed", width: "70px" }];
+    for (var l = 0; l < numberOfPilots; l++) {
+        columns.push({ title: ("Ship " + (l + 1)) });
+    }      
+    console.log("Columns:", columns);
+    return columns;
+}
+
+// ------------------------------------------------------------------
+// Create Datatables dataset
+// ------------------------------------------------------------------
+
+function createDataTablesDataset(squadWinConditions) {
+    var squadWinConditions_forDataTables = [];
+    for (var i = 0; i < squadWinConditions.length; i++) {
+        var winCon = squadWinConditions[i];
+        var newRow = [];
+        newRow.push(winCon.points);
+        for (var j = 0; j < winCon.pilots.length; j++) {
+            var pilotString = "<b>" + winCon.pilots[j].name + "</b> (" + winCon.pilots[j].status + ", " + winCon.pilots[j].points + ")";
+            if (winCon.pilots[j].alreadyDone) {
+                pilotString += (" ✔️");
+            } else {
+                pilotString += (" ❌");
+            }
+            newRow.push(pilotString);
+        }
+        squadWinConditions_forDataTables.push(newRow);
+    }
+    return squadWinConditions_forDataTables;
 }

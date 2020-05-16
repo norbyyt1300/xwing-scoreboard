@@ -38,7 +38,7 @@ body {
     margin-top: 10px;
     padding: 15px;
     font-size: 12px;
-    background-color: darkslategray;
+    /*background-color: darkslategray;*/
     display: none;
 }
 .win-cons-table {

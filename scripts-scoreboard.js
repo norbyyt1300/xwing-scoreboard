@@ -121,6 +121,8 @@ function comparePointsSmallToBig(a, b) {
 // Create the scoreboard for a squad
 // ------------------------------------------------------------------
 
+var squad1NumberOfPilots = 2;
+var squad2NumberOfPilots = 2;
 function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squadNumber) {
     try {
         // Parse the squad JSON
@@ -133,6 +135,13 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         squadFormElement.innerHTML = "";
         // Sort the pilots by points!
         var pilots = squadJSON.pilots.sort(comparePointsBigToSmall);
+        // Save the pilot count
+        if (squadNumber == 1) {
+            squad1NumberOfPilots = pilots.length;
+        }
+        if (squadNumber == 2) {
+            squad2NumberOfPilots = pilots.length;
+        }        
         // For each pilot...
         for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
@@ -169,7 +178,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         totalDestroyed.classList.add("total-squad-points-destroyed");
         totalDestroyed.classList.add("text-danger");
         squadFormElement.appendChild(totalDestroyed);
-        // Update the squad point possibilities
+        // Update the squad point possibilities for BOTH squads
         updateWinConditionPossibilitiesArray(squadFormElement);
     } catch (err) {
         console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);

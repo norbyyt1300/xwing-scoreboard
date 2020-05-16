@@ -29,17 +29,20 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
             pilotArray.push({
                 name: pilotName,
                 points: 0,
-                status: "Undamaged"
+                status: "Undamaged",
+                alreadyDone: true
             });
             pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[1].value),
-                status: "Halved"
+                status: "Halved",
+                alreadyDone: false
             });
             pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
-                status: "Destroyed"
+                status: "Destroyed",
+                alreadyDone: false
             });
         }
         // If the ship is halved, add destroyed as an option
@@ -47,12 +50,14 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
             pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[1].value),
-                status: "Halved"
+                status: "Halved",
+                alreadyDone: true
             });
             pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
-                status: "Destroyed"
+                status: "Destroyed",
+                alreadyDone: false
             });
         }
         // Finally, add destroyed
@@ -60,7 +65,8 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
             pilotArray.push({
                 name: pilotName,
                 points: parseInt(shipStatusSelectElement.options[2].value),
-                status: "Destroyed"
+                status: "Destroyed",
+                alreadyDone: true
             });
         }
         // Add this pilot to the possibility array
@@ -80,7 +86,8 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
         console.log("Squad 2 win conditions:", squad2WinConditions);    
     }
     // Display the results on the page
-    displayPossibilities();
+    //displayPossibilities();
+    displayPossibilitiesUsingDatatables();
 }
 
 // ------------------------------------------------------------------
@@ -113,12 +120,12 @@ function getPossibilitiesThatExceedPointsDestroyed(possibilities, pointsDestroye
         for (var j = 0; j < possibilities.length; j++) {
             var possibility = possibilities[j];
             var totalPointsDestroyedForThisPossibility = sumPoints(possibility);
-            if (totalPointsDestroyedForThisPossibility > squad2PointsDestroyed) {
+            if (totalPointsDestroyedForThisPossibility > pointsDestroyed) {
                 winConditions.push({
                     points: totalPointsDestroyedForThisPossibility,
-                    pilots: possibility,
+                    pilots: possibility//,
                     // Format the possibility in HTML
-                    formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
+                    //formattedString: formatPossibility(totalPointsDestroyedForThisPossibility, possibility)
                 });
             }
         }    
