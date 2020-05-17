@@ -44,3 +44,7 @@ body {
 .win-cons-table {
     width: 100%;
 }
+
+.win-cons-info-button {
+    font-size: 10px;
+}

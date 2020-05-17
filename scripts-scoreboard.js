@@ -85,10 +85,13 @@ function showOrHideXWSFormElement() {
 // Hide the form, then populate the top and bottom scoreboards
 // ------------------------------------------------------------------
 
+// Used by the show or hide win cons button
+var scoreboardCreated = false;
 function populateScoreboard() {
     document.getElementById("xwsForm").style.display = "none";
     populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
+    scoreboardCreated = true;
     // Update the win con possibilities arrays for both squads
     updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
     updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
@@ -145,6 +148,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         if (squadNumber == 2) {
             squad2NumberOfPilots = pilots.length;
         }        
+        console.log("Pilots:", pilots);
         // For each pilot...
         for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
@@ -154,8 +158,15 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             }
             // Also, for each pilot, add:
             var pilotRowHTML = "";
+            // Get the pilot name
+            var formattedPilotName = "";
+            if (pilots[i].name) {
+                formattedPilotName = (pilots[i].name.charAt(0).toUpperCase() + pilots[i].name.substring(1));
+            } else if (pilots[i].id) {
+                formattedPilotName = (pilots[i].id.charAt(0).toUpperCase() + pilots[i].id.substring(1));
+            }
             // The pilot name and ship type
-            pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + (pilots[i].name.charAt(0).toUpperCase() + pilots[i].name.substring(1)) + "</b> (" + pilots[i].ship + ")" + "</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + formattedPilotName + "</b> (" + pilots[i].ship + ")" + "</label></div>";
             // The pilot's whole points
             pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + pilots[i].points + "</span></b> points (whole)</label></div>";
             // The pilot's half points

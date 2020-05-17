@@ -3,15 +3,16 @@
 // ------------------------------------------------------------------
 
 function showOrHideWinConditions() {
-    // Grab the XWS form wrapper element
-    var element = document.getElementById("win-conditions");
-    // if it is displayed...
-    if (element.style.display == "block") {
-        // Set it to not display
-        element.style.display = "none";
-    } else {
-        // Otherwise, if it is not displayed, display it!
-        element.style.display = "block";
+    // Only act if the scoreboard has been created
+    if (scoreboardCreated) {
+        // Grab the element
+        var winConsElement = document.getElementById("win-conditions");
+        // Check the checkbox state    
+        if (document.getElementById("showWinConditions").checked) {
+            winConsElement.style.display = "block";
+        } else {
+            winConsElement.style.display = "none";
+        }
     }
 }
 
@@ -106,6 +107,8 @@ function displayPossibilitiesUsingDatatables() {
     } else { 
         console.log("Not creating datatable; squad 2 win cons was empty.");
     }
+    // Show or hide the datatables
+    showOrHideWinConditions();
 }
 
 // ------------------------------------------------------------------
