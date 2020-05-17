@@ -5,12 +5,12 @@
 var squad1XWS = "";
 var squad2XWS = "";
 if (window.location.search.indexOf('squad1XWS') != -1) {
-    console.log("Importing squad 1 XWS from URL");
+    if (document.getElementById("enableConsoleDebug").checked) console.log("Importing squad 1 XWS from URL");
     // Assume only 1 squad so far
     squad1XWS = window.location.search.split("squad1XWS=")[1];
 }
 if (window.location.search.indexOf('squad2XWS') != -1) {
-    console.log("Importing squad 2 XWS from URL");
+    if (document.getElementById("enableConsoleDebug").checked) console.log("Importing squad 2 XWS from URL");
     // Since there are two squads worth of XWS, split the original var in half, and store each piece (it has to be in this order!)
     squad2XWS = squad1XWS.split("&squad2XWS=")[1];
     squad1XWS = squad1XWS.split("&squad2XWS=")[0];
@@ -27,13 +27,13 @@ function saveToURL() {
     var searchText = "";
     // If there is XWS in a field...
     if (document.getElementById("squad1XWS").value != "") {
-        console.log("Saving squad 1 XWS to URL");
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Saving squad 1 XWS to URL");
         // Add it to the search text (first cleanse the XWS)
         searchText += "squad1XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad1XWS").value);
     }
     // Do this for both XWS fields
     if (document.getElementById("squad2XWS").value != "") {
-        console.log("Saving squad 2 XWS to URL");
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Saving squad 2 XWS to URL");
         searchText += "&squad2XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad2XWS").value);
     }
     // Then actually commit the new search text to the URL, which will reload the page
@@ -49,15 +49,15 @@ function cleanSquadJSONBeforeSavingToURL(jsonString) {
     var tempJSON = JSON.parse(jsonString);
     // Check for potentially lengthy or unneeded properties, and delete them!
     if (tempJSON.vendor) {
-        console.log("Removing vendor information when saving to URL...");
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing vendor information when saving to URL...");
         delete tempJSON.vendor;
     }
     if (tempJSON.description) {
-        console.log("Removing description information when saving to URL...");
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing description information when saving to URL...");
         delete tempJSON.description;
     }
     if (tempJSON.version) {
-        console.log("Removing version information when saving to URL...");
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing version information when saving to URL...");
         delete tempJSON.version;
     }
     // Convert the JSON back into a string
@@ -133,7 +133,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
     try {
         // Parse the squad JSON
         var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
-        console.log("Original JSON for squad " + squadNumber, squadJSON);
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Original JSON for squad " + squadNumber, squadJSON);
         // Get the squad form element, and make it visible
         var squadFormElement = document.getElementById(squadFormElementId);
         document.getElementById(squadFormElementId).style.display = "block";
@@ -148,7 +148,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         if (squadNumber == 2) {
             squad2NumberOfPilots = pilots.length;
         }        
-        console.log("Pilots:", pilots);
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Pilots:", pilots);
         // For each pilot...
         for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
@@ -195,7 +195,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         // Update the squad point possibilities
         updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId);
     } catch (err) {
-        console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
     }
 }
 

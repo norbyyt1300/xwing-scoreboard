@@ -13,7 +13,7 @@ function updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId) {
     if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
         squadNumber = 2;
     }
-    console.log("Updating win conditions for squad number", squadNumber);
+    if (document.getElementById("enableConsoleDebug").checked) console.log("Updating win conditions for squad number", squadNumber);
     // Get all pilots in this squad
     var allPilotRows = squadFormElement.getElementsByClassName("pilot-row");
     // Create an array of arrays, with one array for each pilot
@@ -76,18 +76,18 @@ function updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId) {
     }
     // Get the combinations
     var combinations = cartesian(arrayOfAllPilotPossibilityArrays);
-    console.log("Combinations of all of the possible states of ships in squad " + squadNumber, combinations);
-    console.log("Calculating win conditions for squad " + squadNumber);
+    if (document.getElementById("enableConsoleDebug").checked) console.log("Combinations of all of the possible states of ships in squad " + squadNumber, combinations);
+    if (document.getElementById("enableConsoleDebug").checked) console.log("Calculating win conditions for squad " + squadNumber);
     if (squadNumber == 1) {
         squad1PointPossibilities = combinations;
         squad1WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad2PointPossibilities, squad1PointsDestroyed);
         squad2WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad1PointPossibilities, squad2PointsDestroyed);
-        console.log("Squad 1 win conditions:", squad1WinConditions);     
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Squad 1 win conditions:", squad1WinConditions);     
     } else {
         squad2PointPossibilities = combinations;
         squad2WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad1PointPossibilities, squad2PointsDestroyed);
         squad1WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad2PointPossibilities, squad1PointsDestroyed);
-        console.log("Squad 2 win conditions:", squad2WinConditions);    
+        if (document.getElementById("enableConsoleDebug").checked) console.log("Squad 2 win conditions:", squad2WinConditions);    
     }
 }
 
