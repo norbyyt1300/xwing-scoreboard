@@ -94,11 +94,7 @@ function displayPossibilitiesUsingDatatables() {
             destroy: true,
             data: squad1WinConditions_forDataTables,
             columns: squad1WinConditionsColumns,
-            rowCallback: function (row, data, index) {
-                if (data[1] == 0) {
-                    $("td", row).css('color','green')
-                }
-            }
+            rowCallback: rowCallBackForCompletedWinCons
         });
     } else {
         if (document.getElementById("enableConsoleDebug").checked) console.log("Not creating datatable; squad 1 win cons was empty.");
@@ -108,17 +104,23 @@ function displayPossibilitiesUsingDatatables() {
             destroy: true,
             data: squad2WinConditions_forDataTables,
             columns: squad2WinConditionsColumns,
-            rowCallback: function (row, data, index) {
-                if (data[1] == 0) {
-                    $("td", row).css('color','green')
-                }
-            }
+            rowCallback: rowCallBackForCompletedWinCons
         });
     } else {
         if (document.getElementById("enableConsoleDebug").checked) console.log("Not creating datatable; squad 2 win cons was empty.");
     }
     // Show or hide the datatables
     showOrHideWinConditions();
+}
+
+// ------------------------------------------------------------------
+// Highlight a row green if this condition has been met
+// ------------------------------------------------------------------
+
+function rowCallBackForCompletedWinCons(row, data, index) {
+    if (data[1] == 0) {
+        $("td", row).css('color','green')
+    }
 }
 
 // ------------------------------------------------------------------
