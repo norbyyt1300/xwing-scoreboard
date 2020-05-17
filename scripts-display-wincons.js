@@ -114,7 +114,7 @@ function displayPossibilitiesUsingDatatables() {
 
 function createDataTablesColumnHeaders(numberOfPilots) {
     console.log("Creating columns for a squad with this many pilots:", numberOfPilots);
-    var columns = [{ title: "Total Points Destroyed", width: "70px" }];
+    var columns = [{ title: "Total Points Destroyed", width: "70px" }, { title: "Number of Targets (❌s)", width: "80px" }];
     for (var l = 0; l < numberOfPilots; l++) {
         columns.push({ title: ("Ship " + (l + 1)) });
     }      
@@ -131,13 +131,17 @@ function createDataTablesDataset(squadWinConditions) {
     for (var i = 0; i < squadWinConditions.length; i++) {
         var winCon = squadWinConditions[i];
         var newRow = [];
-        newRow.push(winCon.points);
+        newRow.push(winCon.points); 
+        // Add a placeholder for the number of targets; set it to zero, and increment it ever time alreadyDone is false
+        newRow.push(0);
         for (var j = 0; j < winCon.pilots.length; j++) {
             var pilotString = "<b>" + winCon.pilots[j].name + "</b> (" + winCon.pilots[j].status + ", " + winCon.pilots[j].points + ")";
             if (winCon.pilots[j].alreadyDone) {
                 pilotString += (" ✔️");
             } else {
                 pilotString += (" ❌");
+                // Add 1 to the target count
+                newRow[1] = newRow[1] + 1;
             }
             newRow.push(pilotString);
         }
