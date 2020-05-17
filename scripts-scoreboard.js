@@ -89,8 +89,11 @@ function populateScoreboard() {
     document.getElementById("xwsForm").style.display = "none";
     populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
-    // Added to force execution of squad 1 win cons after squad 2 is populated
-    updateWinConditionPossibilitiesArray(document.getElementById("squad1Form"));
+    // Update the win con possibilities arrays for both squads
+    updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
+    updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
+    // Now that the win con possibilities have been updated, display them
+    displayPossibilitiesUsingDatatables();
 }
 
 // ------------------------------------------------------------------
@@ -132,7 +135,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         var squadFormElement = document.getElementById(squadFormElementId);
         document.getElementById(squadFormElementId).style.display = "block";
         // Prepare to make some inner HTML for the squad        
-        squadFormElement.innerHTML = "";
+        squadFormElement.innerHTML = "<h4>Squad " + squadNumber + "</h4>";
         // Sort the pilots by points!
         var pilots = squadJSON.pilots.sort(comparePointsBigToSmall);
         // Save the pilot count
@@ -159,7 +162,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(pilots[i].points / 2) + "</b> points (halved)</label></div>";
             // A select for changing the ship status
             pilotRowHTML += "<div class='col-sm-2'>" +
-                "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='updateTotalPointsDestroyedForThisSquad(this)'>" +
+                "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='shipStatusChanged(this)'>" +
                 "<option data-multiplier='0' value=0>Undamaged</option>" +
                 "<option data-multiplier='0.5' value=" + Math.ceil(pilots[i].points / 2) + ">Halved</option>" +
                 "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed</option>" +
@@ -178,8 +181,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         totalDestroyed.classList.add("total-squad-points-destroyed");
         totalDestroyed.classList.add("text-danger");
         squadFormElement.appendChild(totalDestroyed);
-        // Update the squad point possibilities for BOTH squads
-        updateWinConditionPossibilitiesArray(squadFormElement);
+        // Update the squad point possibilities
+        updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId);
     } catch (err) {
         console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
     }
@@ -188,6 +191,30 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
 // ------------------------------------------------------------------
 // When a ship status select is changed!
 // ------------------------------------------------------------------
+
+function shipStatusChanged(shipStatusSelectElement) {
+    // Update the total points destroyed, then now that the total has changed...
+    updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement);
+    // Get the squad number for this squad
+    var squadNumber = 1;
+    var squadFormElement = shipStatusSelectElement.parentElement.parentElement.parentElement;
+    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
+        // If we can't find squad-1 in the classlist, then this must be squad 2
+        squadNumber = 2;
+    }
+    // Update the win con possibilities arrays for both squads, but in the right order
+    if (squadNumber == 1) {
+        // If the change was made to squad 1, first update the win cons for squad 1, then squad 2
+        updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
+        updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
+    } else {
+        // If the change was made to squad 2, first update the win cons for squad 1, then squad 2
+        updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
+        updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
+    }
+    // Now that the win con possibilities have been updated, display them
+    displayPossibilitiesUsingDatatables();
+}
 
 var squad1PointsDestroyed = 0;
 var squad2PointsDestroyed = 0;
@@ -210,6 +237,4 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     } else {
         squad1PointsDestroyed = newTotalPointsDestroyed;
     }
-    // Update the win con possibilities array
-    updateWinConditionPossibilitiesArray(squadFormElement);
 }

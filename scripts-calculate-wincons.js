@@ -6,12 +6,14 @@ var squad1PointPossibilities = [];
 var squad2PointPossibilities = [];
 var squad1WinConditions = [];
 var squad2WinConditions = [];
-function updateWinConditionPossibilitiesArray(squadFormElement) {
+function updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId) {
+    var squadFormElement = document.getElementById(squadFormElementId);
     // Determine the squad, 1 or 2, and update total pts destroyed
     var squadNumber = 1;
     if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
         squadNumber = 2;
     }
+    console.log("Updating win conditions for squad number", squadNumber);
     // Get all pilots in this squad
     var allPilotRows = squadFormElement.getElementsByClassName("pilot-row");
     // Create an array of arrays, with one array for each pilot
@@ -74,20 +76,19 @@ function updateWinConditionPossibilitiesArray(squadFormElement) {
     }
     // Get the combinations
     var combinations = cartesian(arrayOfAllPilotPossibilityArrays);
-    console.log("Combinations for squad " + squadNumber, combinations);
+    console.log("Combinations of all of the possible states of ships in squad " + squadNumber, combinations);
     console.log("Calculating win conditions for squad " + squadNumber);
     if (squadNumber == 1) {
         squad1PointPossibilities = combinations;
         squad1WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad2PointPossibilities, squad1PointsDestroyed);
+        squad2WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad1PointPossibilities, squad2PointsDestroyed);
         console.log("Squad 1 win conditions:", squad1WinConditions);     
     } else {
         squad2PointPossibilities = combinations;
         squad2WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad1PointPossibilities, squad2PointsDestroyed);
+        squad1WinConditions = getPossibilitiesThatExceedPointsDestroyed(squad2PointPossibilities, squad1PointsDestroyed);
         console.log("Squad 2 win conditions:", squad2WinConditions);    
     }
-    // Display the results on the page
-    //displayPossibilities();
-    displayPossibilitiesUsingDatatables();
 }
 
 // ------------------------------------------------------------------
