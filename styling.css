@@ -48,3 +48,7 @@ body {
 .win-cons-info-button {
     font-size: 10px;
 }
+
+.modal-body {
+    font-size: 12px;
+}
