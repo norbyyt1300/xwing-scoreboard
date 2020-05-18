@@ -165,18 +165,20 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             } else if (pilots[i].id) {
                 formattedPilotName = (pilots[i].id.charAt(0).toUpperCase() + pilots[i].id.substring(1));
             }
+            // Calculate half points
+            var halfPoints = Math.ceil(pilots[i].points / 2);
             // The pilot name and ship type
             pilotRowHTML += "<div class='col'><label class='col-form-label' data-toggle='tooltip' data-placement='top' title='" + toolTipText + "'><b>" + formattedPilotName + "</b> (" + pilots[i].ship + ")" + "</label></div>";
             // The pilot's whole points
-            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + pilots[i].points + "</span></b> points (whole)</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label whole-points-label'><b><span class='whole-points-span'>" + pilots[i].points + "</span></b> points</label></div>";
             // The pilot's half points
-            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + Math.ceil(pilots[i].points / 2) + "</b> points (halved)</label></div>";
+            pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + halfPoints + "</b> points (halved)</label></div>";
             // A select for changing the ship status
             pilotRowHTML += "<div class='col-sm-2'>" +
                 "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='shipStatusChanged(this)'>" +
-                "<option data-multiplier='0' value=0>Undamaged</option>" +
-                "<option data-multiplier='0.5' value=" + Math.ceil(pilots[i].points / 2) + ">Halved</option>" +
-                "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed</option>" +
+                "<option data-multiplier='0' value=0>Undamaged (0)</option>" +
+                "<option data-multiplier='0.5' value=" + halfPoints + ">Halved (" + halfPoints + ")</option>" +
+                "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed (" + pilots[i].points + ")</option>" +
                 "</select>" +
                 "</div>";
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
@@ -188,7 +190,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         }
         // Now, for the whole squad, create a element to hold the total points and total destroyed
         var totalDestroyed = document.createElement("div");
-        totalDestroyed.innerHTML = "Total squad points destroyed: <span id='squad-" + squadNumber + "-total-squad-points-destroyed' class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
+        totalDestroyed.innerHTML = "Sum: <span id='squad-" + squadNumber + "-total-squad-points-destroyed' class='total-squad-points-destroyed-span'>0</span> / " + squadJSON.points;
         totalDestroyed.classList.add("total-squad-points-destroyed");
         totalDestroyed.classList.add("text-danger");
         squadFormElement.appendChild(totalDestroyed);
@@ -245,7 +247,17 @@ function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
     // Determine the squad, 1 or 2, and update total pts destroyed global var
     if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
         squad2PointsDestroyed = newTotalPointsDestroyed;
+		updateSquadPointsLostSpans(2, squad2PointsDestroyed)
     } else {
         squad1PointsDestroyed = newTotalPointsDestroyed;
+		updateSquadPointsLostSpans(1, squad1PointsDestroyed)
     }
+}
+
+function updateSquadPointsLostSpans(squadNumber, pointsDestroyed) {
+	var className = "squad" + squadNumber + "PointsLost";
+	var spans = document.getElementsByClassName(className);
+	for (var i = 0; i < spans.length; i++) {
+		spans[i].innerText = pointsDestroyed;
+	}
 }

@@ -1,18 +1,32 @@
+/* Overall styling */
+
+body {
+    background-color: #202020;
+}
+
+.container-fluid {
+    padding: 0px;
+}
+
+/* Settings form */
+
+#mainNavbar {
+    background-color: #101010;
+}
+
 #xwsForm {
     padding: 15px;
     margin-top: 10px;
 }
 
-.total-squad-points-destroyed {
-    text-align: right;
-    font-weight: bold;
-    margin-top: 10px;
-}
+
+/* Squad scoreboard styling */
 
 .squad-form {
     padding: 15px;
     display: none;
     margin-top: 10px;
+    text-align: right;
 }
 
 .squad-1-color {
@@ -23,17 +37,22 @@
     background-color: lightpink;
 }
 
-#mainNavbar {
-    background-color: #101010;
+.total-squad-points-destroyed {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 5px;
+    border-top: 2px solid black;
+    display: inline-block;
+    margin-left: auto;
+    width: 165px;
 }
 
-body {
-    background-color: #202020;
+.form-row, h4 {
+    text-align: left;
 }
 
-.container-fluid {
-    padding: 0px;
-}
+/* Win cons styling */
+
 #win-conditions {
     margin-top: 10px;
     padding: 15px;
@@ -48,6 +67,13 @@ body {
 .win-cons-info-button {
     font-size: 10px;
 }
+
+.squad1PointsLost, .squad2PointsLost {
+	font-weight: bold;
+	color: red;
+}
+
+/* Help modal styling */
 
 .modal-body {
     font-size: 12px;

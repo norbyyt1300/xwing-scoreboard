@@ -26,6 +26,8 @@ function updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId) {
         var pilotName = allPilotRows[i].innerText.split(" ")[0];
         // Add an object for the pilot name and its points
         var status = shipStatusSelectElement.options[shipStatusSelectElement.selectedIndex].text;
+		// Trim off the points at the end of the status text
+		status = status.split(" ")[0];
         // If the ship is undamaged, add halved and destroyed as future options
         if (status == "Undamaged") {
             pilotArray.push({
