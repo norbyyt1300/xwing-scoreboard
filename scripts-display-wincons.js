@@ -129,7 +129,7 @@ function rowCallBackForCompletedWinCons(row, data, index) {
 
 function createDataTablesColumnHeaders(numberOfPilots) {
     if (document.getElementById("enableConsoleDebug").checked) console.log("Creating columns for a squad with this many pilots:", numberOfPilots);
-    var columns = [{ title: "Points Scored for this Win Con.", width: "85px" }, { title: "Number of Enemy Targets (❌s)", width: "50px" }];
+    var columns = [{ title: "Points Scored for this Win Con.", width: "85px" }, { title: "Number of Enemy Targets (&#10060;s)", width: "50px" }];
     for (var l = 0; l < numberOfPilots; l++) {
         columns.push({ title: ("Enemy Ship " + (l + 1)) });
     }
@@ -152,9 +152,9 @@ function createDataTablesDataset(squadWinConditions) {
         for (var j = 0; j < winCon.pilots.length; j++) {
             var pilotString = "<b>" + winCon.pilots[j].name + "</b> (" + winCon.pilots[j].status + ", " + winCon.pilots[j].points + ")";
             if (winCon.pilots[j].alreadyDone) {
-                pilotString += (" ✔️");
+                pilotString += (" &#9989;");
             } else {
-                pilotString += (" ❌");
+                pilotString += (" &#10060;");
                 // Add 1 to the target count
                 newRow[1] = newRow[1] + 1;
             }
