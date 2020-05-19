@@ -54,14 +54,25 @@ body {
 /* Win cons styling */
 
 #win-conditions {
-    margin-top: 10px;
-    padding: 15px;
-    font-size: 12px;
     /*background-color: darkslategray;*/
     display: none;
 }
+.squad-win-cons-wrapper {
+    margin-top: 10px;
+    padding: 15px;
+    font-size: 12px;
+    overflow-x: scroll;    
+}
 .win-cons-table {
     width: 100%;
+}
+#winConsChart {
+    margin-top: 10px;
+    height: 600px;
+}
+#resetTracesButton {
+    margin-left: 10px;
+    margin-top: 10px;
 }
 
 .win-cons-info-button {

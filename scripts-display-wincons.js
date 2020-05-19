@@ -70,6 +70,8 @@ function displayPossibilities() {
 // Display the possibilities on the page using Datatables
 // ------------------------------------------------------------------
 
+var squad1NumberOfWinCons = 0;
+var squad2NumberOfWinCons = 0;
 function displayPossibilitiesUsingDatatables() {
 
     // Initialize empty arrays
@@ -83,10 +85,14 @@ function displayPossibilitiesUsingDatatables() {
     // Loop through the win con possibilities and reformat the data to make it suitable for datatables
     var squad1WinConditions_forDataTables = createDataTablesDataset(squad1WinConditions);
     var squad2WinConditions_forDataTables = createDataTablesDataset(squad2WinConditions);
+	
+	// Save the win con count
+	squad1NumberOfWinCons = squad1WinConditions_forDataTables.length;
+	squad2NumberOfWinCons = squad1WinConditions_forDataTables.length;
 
     // Log to console
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Squad 1 win cons data set for datatables:", squad1WinConditions_forDataTables);
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Squad 2 win cons data set for datatables:", squad2WinConditions_forDataTables);
+    if (enableDebug) console.log("Squad 1 win cons data set for datatables:", squad1WinConditions_forDataTables);
+    if (enableDebug) console.log("Squad 2 win cons data set for datatables:", squad2WinConditions_forDataTables);
 
     // Create the tables
     if (squad1WinConditions_forDataTables.length > 0) {
@@ -97,7 +103,7 @@ function displayPossibilitiesUsingDatatables() {
             rowCallback: rowCallBackForCompletedWinCons
         });
     } else {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Not creating datatable; squad 1 win cons was empty.");
+        if (enableDebug) console.log("Not creating datatable; squad 1 win cons was empty.");
     }
     if (squad2WinConditions_forDataTables.length > 0) {
         $('#squad2WinConditions').DataTable({
@@ -107,7 +113,7 @@ function displayPossibilitiesUsingDatatables() {
             rowCallback: rowCallBackForCompletedWinCons
         });
     } else {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Not creating datatable; squad 2 win cons was empty.");
+        if (enableDebug) console.log("Not creating datatable; squad 2 win cons was empty.");
     }
     // Show or hide the datatables
     showOrHideWinConditions();
@@ -128,12 +134,12 @@ function rowCallBackForCompletedWinCons(row, data, index) {
 // ------------------------------------------------------------------
 
 function createDataTablesColumnHeaders(numberOfPilots) {
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Creating columns for a squad with this many pilots:", numberOfPilots);
+    if (enableDebug) console.log("Creating columns for a squad with this many pilots:", numberOfPilots);
     var columns = [{ title: "Points Scored for this Win Con.", width: "85px" }, { title: "Number of Enemy Targets (&#10060;s)", width: "50px" }];
     for (var l = 0; l < numberOfPilots; l++) {
         columns.push({ title: ("Enemy Ship " + (l + 1)) });
     }
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Columns:", columns);
+    if (enableDebug) console.log("Columns:", columns);
     return columns;
 }
 

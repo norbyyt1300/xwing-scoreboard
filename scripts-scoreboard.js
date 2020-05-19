@@ -1,3 +1,8 @@
+var enableDebug = false;
+function toggleConsoleDebug() {
+    enableDebug = enableDebug;
+}
+
 // ------------------------------------------------------------------
 // Check if there is XWS in the URL; if so, grab it, and drop it into the XWS forms
 // ------------------------------------------------------------------
@@ -5,12 +10,12 @@
 var squad1XWS = "";
 var squad2XWS = "";
 if (window.location.search.indexOf('squad1XWS') != -1) {
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Importing squad 1 XWS from URL");
+    if (enableDebug) console.log("Importing squad 1 XWS from URL");
     // Assume only 1 squad so far
     squad1XWS = window.location.search.split("squad1XWS=")[1];
 }
 if (window.location.search.indexOf('squad2XWS') != -1) {
-    if (document.getElementById("enableConsoleDebug").checked) console.log("Importing squad 2 XWS from URL");
+    if (enableDebug) console.log("Importing squad 2 XWS from URL");
     // Since there are two squads worth of XWS, split the original var in half, and store each piece (it has to be in this order!)
     squad2XWS = squad1XWS.split("&squad2XWS=")[1];
     squad1XWS = squad1XWS.split("&squad2XWS=")[0];
@@ -27,13 +32,13 @@ function saveToURL() {
     var searchText = "";
     // If there is XWS in a field...
     if (document.getElementById("squad1XWS").value != "") {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Saving squad 1 XWS to URL");
+        if (enableDebug) console.log("Saving squad 1 XWS to URL");
         // Add it to the search text (first cleanse the XWS)
         searchText += "squad1XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad1XWS").value);
     }
     // Do this for both XWS fields
     if (document.getElementById("squad2XWS").value != "") {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Saving squad 2 XWS to URL");
+        if (enableDebug) console.log("Saving squad 2 XWS to URL");
         searchText += "&squad2XWS=" + cleanSquadJSONBeforeSavingToURL(document.getElementById("squad2XWS").value);
     }
     // Then actually commit the new search text to the URL, which will reload the page
@@ -49,15 +54,15 @@ function cleanSquadJSONBeforeSavingToURL(jsonString) {
     var tempJSON = JSON.parse(jsonString);
     // Check for potentially lengthy or unneeded properties, and delete them!
     if (tempJSON.vendor) {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing vendor information when saving to URL...");
+        if (enableDebug) console.log("Removing vendor information when saving to URL...");
         delete tempJSON.vendor;
     }
     if (tempJSON.description) {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing description information when saving to URL...");
+        if (enableDebug) console.log("Removing description information when saving to URL...");
         delete tempJSON.description;
     }
     if (tempJSON.version) {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Removing version information when saving to URL...");
+        if (enableDebug) console.log("Removing version information when saving to URL...");
         delete tempJSON.version;
     }
     // Convert the JSON back into a string
@@ -93,10 +98,16 @@ function populateScoreboard() {
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
     scoreboardCreated = true;
     // Update the win con possibilities arrays for both squads
-    updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
-    updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
+    updateWinConditionPossibilitiesArrayForThisSquad(1);
+    updateWinConditionPossibilitiesArrayForThisSquad(2);
     // Now that the win con possibilities have been updated, display them
     displayPossibilitiesUsingDatatables();
+    /*
+    // Finally, update the plot
+	resetTraces();
+	updateTraceDataArrays();
+    updatePlot();
+    */
 }
 
 // ------------------------------------------------------------------
@@ -133,7 +144,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
     try {
         // Parse the squad JSON
         var squadJSON = JSON.parse(document.getElementById(squadXWSElementId).value);
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Original JSON for squad " + squadNumber, squadJSON);
+        if (enableDebug) console.log("Original JSON for squad " + squadNumber, squadJSON);
         // Get the squad form element, and make it visible
         var squadFormElement = document.getElementById(squadFormElementId);
         document.getElementById(squadFormElementId).style.display = "block";
@@ -147,8 +158,8 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         }
         if (squadNumber == 2) {
             squad2NumberOfPilots = pilots.length;
-        }        
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Pilots:", pilots);
+        }
+        if (enableDebug) console.log("Pilots:", pilots);
         // For each pilot...
         for (var i = 0; i < pilots.length; i++) {
             // Create tooltip text containing the pilot's upgrades!
@@ -175,7 +186,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             pilotRowHTML += "<div class='col'><label class='col-form-label half-points-label'><b>" + halfPoints + "</b> points (halved)</label></div>";
             // A select for changing the ship status
             pilotRowHTML += "<div class='col-sm-2'>" +
-                "<select class='form-control form-control-sm pilot-points-destroyed-select' onchange='shipStatusChanged(this)'>" +
+                "<select class='form-control form-control-sm pilot-points-destroyed-select-squad-" + squadNumber + "' onchange='shipStatusChanged(" + squadNumber + ")'>" +
                 "<option data-multiplier='0' value=0>Undamaged (0)</option>" +
                 "<option data-multiplier='0.5' value=" + halfPoints + ">Halved (" + halfPoints + ")</option>" +
                 "<option data-multiplier='1' value=" + pilots[i].points + ">Destroyed (" + pilots[i].points + ")</option>" +
@@ -184,7 +195,7 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
             // Finally, create a new element for this pilot, give it this new inner HTML, and add it to the squad parent element
             var pilotRow = document.createElement("div");
             pilotRow.classList.add("form-row");
-            pilotRow.classList.add("pilot-row");
+            pilotRow.classList.add("pilot-row-squad-" + squadNumber);
             pilotRow.innerHTML = pilotRowHTML;
             squadFormElement.appendChild(pilotRow);
         }
@@ -195,9 +206,9 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
         totalDestroyed.classList.add("text-danger");
         squadFormElement.appendChild(totalDestroyed);
         // Update the squad point possibilities
-        updateWinConditionPossibilitiesArrayForThisSquad(squadFormElementId);
+        updateWinConditionPossibilitiesArrayForThisSquad(squadNumber);
     } catch (err) {
-        if (document.getElementById("enableConsoleDebug").checked) console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
+        if (enableDebug) console.log("Error with this squad: ", squadXWSElementId, squadFormElementId, err);
     }
 }
 
@@ -205,25 +216,18 @@ function populateScoreboardForASquad(squadXWSElementId, squadFormElementId, squa
 // When a ship status select is changed!
 // ------------------------------------------------------------------
 
-function shipStatusChanged(shipStatusSelectElement) {
+function shipStatusChanged(squadNumber) {
     // Update the total points destroyed, then now that the total has changed...
-    updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement);
-    // Get the squad number for this squad
-    var squadNumber = 1;
-    var squadFormElement = shipStatusSelectElement.parentElement.parentElement.parentElement;
-    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
-        // If we can't find squad-1 in the classlist, then this must be squad 2
-        squadNumber = 2;
-    }
+    updateTotalPointsDestroyedForThisSquad(squadNumber);
     // Update the win con possibilities arrays for both squads, but in the right order
     if (squadNumber == 1) {
         // If the change was made to squad 1, first update the win cons for squad 1, then squad 2
-        updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
-        updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
+        updateWinConditionPossibilitiesArrayForThisSquad(2);
+        updateWinConditionPossibilitiesArrayForThisSquad(1);
     } else {
         // If the change was made to squad 2, first update the win cons for squad 1, then squad 2
-        updateWinConditionPossibilitiesArrayForThisSquad("squad1Form");
-        updateWinConditionPossibilitiesArrayForThisSquad("squad2Form");
+        updateWinConditionPossibilitiesArrayForThisSquad(1);
+        updateWinConditionPossibilitiesArrayForThisSquad(2);
     }
     // Now that the win con possibilities have been updated, display them
     displayPossibilitiesUsingDatatables();
@@ -231,33 +235,32 @@ function shipStatusChanged(shipStatusSelectElement) {
 
 var squad1PointsDestroyed = 0;
 var squad2PointsDestroyed = 0;
-function updateTotalPointsDestroyedForThisSquad(shipStatusSelectElement) {
+function updateTotalPointsDestroyedForThisSquad(squadNumber) {
     // Update the total points destroyed
-    var squadFormElement = shipStatusSelectElement.parentElement.parentElement.parentElement;
     //First, get all the pilot points destroyed elements
     var newTotalPointsDestroyed = 0;
-    var allPilotPointsDestroyedSelectElements = squadFormElement.getElementsByClassName("pilot-points-destroyed-select");
+    var allPilotPointsDestroyedSelectElements = document.getElementsByClassName("pilot-points-destroyed-select-squad-" + squadNumber);
     for (var i = 0; i < allPilotPointsDestroyedSelectElements.length; i++) {
         // And add each pilots destroyed points to the total
         newTotalPointsDestroyed += parseInt(allPilotPointsDestroyedSelectElements[i].value);
     }
     // Get the element containing the total points destroyed, and update its value
-    var totalSquadPointsDestroyedSpanElement = squadFormElement.getElementsByClassName("total-squad-points-destroyed-span")[0];
+    var totalSquadPointsDestroyedSpanElement = document.getElementById("squad-" + squadNumber + "-total-squad-points-destroyed");
     totalSquadPointsDestroyedSpanElement.innerText = newTotalPointsDestroyed;
     // Determine the squad, 1 or 2, and update total pts destroyed global var
-    if ((squadFormElement.classList + "").indexOf("squad-1") == -1) {
+    if (squadNumber == 2) {
         squad2PointsDestroyed = newTotalPointsDestroyed;
-		updateSquadPointsLostSpans(2, squad2PointsDestroyed)
     } else {
         squad1PointsDestroyed = newTotalPointsDestroyed;
-		updateSquadPointsLostSpans(1, squad1PointsDestroyed)
     }
+    // Update the "squad points lost" spans on the tables
+    updateSquadPointsLostSpans(squadNumber, newTotalPointsDestroyed);
 }
 
 function updateSquadPointsLostSpans(squadNumber, pointsDestroyed) {
-	var className = "squad" + squadNumber + "PointsLost";
-	var spans = document.getElementsByClassName(className);
-	for (var i = 0; i < spans.length; i++) {
-		spans[i].innerText = pointsDestroyed;
-	}
+    var className = "squad" + squadNumber + "PointsLost";
+    var spans = document.getElementsByClassName(className);
+    for (var i = 0; i < spans.length; i++) {
+        spans[i].innerText = pointsDestroyed;
+    }
 }

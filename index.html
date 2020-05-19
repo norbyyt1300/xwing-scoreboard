@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="styling.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
     <title>X-Wing Scoreboard</title>
+    <!-- Other JS -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body>
@@ -47,8 +49,8 @@
             </div>
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="enableConsoleDebug">
-                <label class="form-check-label">Enable console debug</label>
-            </div>            
+                <label class="form-check-label" onclick='toggleConsoleDebug()'>Enable console debug</label>
+            </div>
             <br>
             <button type="button" class="btn btn-sm btn-secondary" onclick="saveToURL()">Save to URL</button>
             <button type="button" class="btn btn-sm btn-danger" onclick="populateScoreboard()">GO</button>
@@ -62,18 +64,35 @@
         </form>
         <form id="squad2Form" class="squad-form squad-2-color">
         </form>
-        <div id='win-conditions' class='text-dark bg-light'>
-            <br>
-            <h4>Squad 1 Win Conditions&nbsp;<span class="win-cons-info-button" data-toggle="modal" data-target="#infoModal">ℹ</span></h4>
-			<div id='squad1WinConditionsPointsComparison'>Squad 2 has scored <span class="squad1PointsLost">0</span> points from Squad 1, and Squad 1 has scored <span class="squad2PointsLost">0</span> points from Squad 2</div>
-			<br>
-            <table id="squad1WinConditions" class="display" width="100%"></table>
-            <br>
-            <h4>Squad 2 Win Conditions&nbsp;<span class="win-cons-info-button" data-toggle="modal" data-target="#infoModal">ℹ</span></h4>
-			<div id='squad2WinConditionsPointsComparison'>Squad 1 has scored <span class="squad2PointsLost">0</span> points from Squad 2, and Squad 2 has scored <span class="squad1PointsLost">0</span> points from Squad 1</div>
-			<br>
-            <table id="squad2WinConditions" class="display" width="100%"></table>
-            <br>
+        <div id='win-conditions'>
+            <div class="squad-win-cons-wrapper text-dark bg-light">
+                <br>
+                <h4>Squad 1 Win Conditions&nbsp;<span class="win-cons-info-button" data-toggle="modal"
+                        data-target="#infoModal">ℹ</span></h4>
+                <div id='squad1WinConditionsPointsComparison'>Squad 2 has scored <span class="squad1PointsLost">0</span>
+                    points from Squad 1, and Squad 1 has scored <span class="squad2PointsLost">0</span> points from
+                    Squad 2</div>
+                <br>
+                <table id="squad1WinConditions" class="display" width="100%"></table>
+                <br>
+            </div>
+            <div class="squad-win-cons-wrapper text-dark bg-light">
+                <br>
+                <h4>Squad 2 Win Conditions&nbsp;<span class="win-cons-info-button" data-toggle="modal"
+                        data-target="#infoModal">ℹ</span></h4>
+                <div id='squad2WinConditionsPointsComparison'>Squad 1 has scored <span class="squad2PointsLost">0</span>
+                    points from Squad 2, and Squad 2 has scored <span class="squad1PointsLost">0</span> points from
+                    Squad 1</div>
+                <br>
+                <table id="squad2WinConditions" class="display" width="100%"></table>
+                <br>
+            </div>
+            <!--
+            <div id="winConsChart" class="bg-light">
+			<a type="submit" class="btn btn-sm btn-danger text-light" onclick="resetTraces()"
+            id="resetTracesButton">Reset Traces</a>
+            </div>
+            -->
         </div>
     </div>
 
@@ -89,14 +108,29 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    Give the current status of each ship, this will present a table showing the possible win conditions for each squad: for example, what would squad 1 need to do in order to win, given the condition of all the ships.  Here is how you can interpret the tables:
+                    Give the current status of each ship, this will present a table showing the possible win conditions
+                    for each squad: for example, what would squad 1 need to do in order to win, given the condition of
+                    all the ships. Here is how you can interpret the tables:
                     <br>
-                    <br><br><b>Points Scored for this Win Con.</b>: The total number of enemy points destroyed for this win condition
-                    <br><br><b>Number of Enemy Targets</b>: For this win condition, the number of enemy ships whose status needs to be changed, e.g. from Undamaged to Halved; if the number of targets is zero, then that means that you've already achieved this win condition, and this row in the table will appear green
-                    <br><br><b>Enemy Ship N</b>: The enemy pilot, ship status for this win condition, and a mark next to it indicating if this has already been accomplished (a check mark)
+                    <br><br><b>Points Scored for this Win Con.</b>: The total number of enemy points destroyed for this
+                    win condition
+                    <br><br><b>Number of Enemy Targets</b>: For this win condition, the number of enemy ships whose
+                    status needs to be changed, e.g. from Undamaged to Halved; if the number of targets is zero, then
+                    that means that you've already achieved this win condition, and this row in the table will appear
+                    green
+                    <br><br><b>Enemy Ship N</b>: The enemy pilot, ship status for this win condition, and a mark next to
+                    it indicating if this has already been accomplished (a check mark)
                     <br>
                     <br>
-                    Here is an example of how this information can be used. Suppose that two of your ships (Squad 1) have been halved and one of your opponent's ships (Squad 2) has been destroyed. You can then consult the table of your win conditions to see what combinations of Undamaged, Halved, and Destroyed enemy ships you need to achieve in order to overcome your current lost points. The tables recalculate every time a ship status changes (e.g. from Halved to Destroyed), so the list of win conditions can change quickly. The list should shrink as the game goes on; in other words, as you lose points (assuming that your ships are being Halved or Destroyed), you should see that the list of win conditions for you should shrink as well, since it's going to be "harder" to win, because you'll need to do very specific amounts of damage to your enemy.
+                    Here is an example of how this information can be used. Suppose that two of your ships (Squad 1)
+                    have been halved and one of your opponent's ships (Squad 2) has been destroyed. You can then consult
+                    the table of your win conditions to see what combinations of Undamaged, Halved, and Destroyed enemy
+                    ships you need to achieve in order to overcome your current lost points. The tables recalculate
+                    every time a ship status changes (e.g. from Halved to Destroyed), so the list of win conditions can
+                    change quickly. The list should shrink as the game goes on; in other words, as you lose points
+                    (assuming that your ships are being Halved or Destroyed), you should see that the list of win
+                    conditions for you should shrink as well, since it's going to be "harder" to win, because you'll
+                    need to do very specific amounts of damage to your enemy.
                     <br>
                     <br>
                     Click <a href="https://norbyyt1300.github.io/xwing-scoreboard/index.html?squad1XWS={%22faction%22:%22galacticempire%22,%22pilots%22:[{%22id%22:%22grandinquisitor%22,%22ship%22:%22tieadvancedv1%22,%22points%22:52,%22upgrades%22:{}},{%22id%22:%22darthvader%22,%22ship%22:%22tieadvancedx1%22,%22points%22:76,%22upgrades%22:{%22sensor%22:[%22passivesensors%22],%22modification%22:[%22afterburners%22]}},{%22id%22:%22whisper%22,%22ship%22:%22tiephphantom%22,%22points%22:71,%22upgrades%22:{%22sensor%22:[%22passivesensors%22],%22gunner%22:[%22fifthbrother%22]}}],%22obstacles%22:[%22coreasteroid5%22,%22core2asteroid4%22,%22core2asteroid5%22],%22points%22:199}&squad2XWS={%22faction%22:%22scumandvillainy%22,%22pilots%22:[{%22id%22:%22bobafett%22,%22ship%22:%22firesprayclasspatrolcraft%22,%22points%22:113,%22upgrades%22:{%22talent%22:[%22fearless%22],%22cannon%22:[%22jammingbeam%22],%22crew%22:[%22maul%22],%22device%22:[%22protonbombs%22],%22illicit%22:[%22contrabandcybernetics%22],%22modification%22:[%22hullupgrade%22],%22title%22:[%22slavei%22]}},{%22id%22:%22dengar%22,%22ship%22:%22jumpmaster5000%22,%22points%22:86,%22upgrades%22:{%22talent%22:[%22marksmanship%22],%22torpedo%22:[%22protontorpedoes%22],%22cannon%22:[%22autoblasters%22],%22crew%22:[%22l337%22],%22gunner%22:[%22hansolo-gunner%22],%22illicit%22:[%22contrabandcybernetics%22]}}],%22points%22:199}" target="_blank">here</a> to see an example scoreboard. You can see, for instance, that once Boba Fett is halved, only four of the original 26 win conditions are no longer valid--and that the first suggested win condition is destroying the opposing Vader, followed by destroying Whisper. Altogether, hopefully this interface can be helpful in trying to build a plan of attack against a particular meta squad, or retroactively to help identify where in a match one should have targeted a different ship to create a better chance of winning.
@@ -118,6 +152,7 @@
     <script src="scripts-scoreboard.js"></script>
     <script src="scripts-calculate-wincons.js"></script>
     <script src="scripts-display-wincons.js"></script>
+    <script src="scripts-plot-wincons.js"></script>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
