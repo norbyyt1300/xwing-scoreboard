@@ -44,6 +44,8 @@ function resetTraces() {
 
     squad1MinimumNumberOfTargetsToWin = [];
     squad2MinimumNumberOfTargetsToWin = [];
+
+    updatePlot();
 }
 
 // ------------------------------------------------------------------
@@ -55,21 +57,23 @@ function assembleArraysIntoDataForPlot() {
     var data = [{
         x: x,
         y: squad1PointsLost,
-        mode: 'lines+markers',
+        mode: 'lines',
         name: 'Squad 1 Points Lost',
         line: {
             color: "cyan",
             width: 2
-        }
+        },
+        hoverinfo: "y"
     }, {
         x: x,
         y: squad2PointsLost,
-        mode: 'lines+markers',
+        mode: 'lines',
         name: 'Squad 2 Points Lost',
         line: {
             color: "pink",
             width: 2
-        }
+        },
+        hoverinfo: "y"
     }, {
         x: x,
         y: squad1NumberOfWinConsRemaining,
@@ -79,7 +83,8 @@ function assembleArraysIntoDataForPlot() {
             color: "cyan",
             dash: 'dashdot',
             width: 1
-        }
+        },
+        hoverinfo: "y"
     }, {
         x: x,
         y: squad2NumberOfWinConsRemaining,
@@ -89,7 +94,8 @@ function assembleArraysIntoDataForPlot() {
             color: "pink",
             dash: 'dashdot',
             width: 1
-        }
+        },
+        hoverinfo: "y"
     }, {
         x: x,
         y: squad1NumberOfShipsUndamaged,
@@ -124,12 +130,26 @@ function assembleArraysIntoDataForPlot() {
         x: x,
         y: squad1MinimumNumberOfTargetsToWin,
         mode: 'lines+markers',
-        name: 'Squad 1 Minimum # Targets to Win'
+        name: 'Squad 1 Minimum # Targets to Win',
+        line: {
+            color: "blue",
+            dash: 'dash',
+            width: 1
+        },
+        hoverinfo: "y",
+        yaxis: 'y2'
     }, {
         x: x,
         y: squad2MinimumNumberOfTargetsToWin,
         mode: 'lines+markers',
-        name: 'Squad 2 Minimum # Targets to Win'
+        name: 'Squad 2 Minimum # Targets to Win',
+        line: {
+            color: "red",
+            dash: 'dash',
+            width: 1
+        },
+        hoverinfo: "y",
+        yaxis: 'y2'
     }];
     console.log("Chart data:", data);
     return data;
@@ -144,24 +164,49 @@ function updatePlot() {
     // Update the data arrays
     updateTraceDataArrays();
     console.log("Updating plot!");
-    // Set up the layout and config
-    var layout = {
-        title: {
-            text: 'Plot of Win Con Data'
-        },
-        xaxis: {
-            title: 'Event'
-        },
-        yaxis: {
-            title: '(Stat)'
-        },
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)'
-    };
-    var config = { responsive: true };
     // Create the plot
-    Plotly.newPlot('winConsChart', assembleArraysIntoDataForPlot(), layout, config);
+    Plotly.newPlot('winConsChart', assembleArraysIntoDataForPlot(), LAYOUT, CONFIG);
 }
+
+// ------------------------------------------------------------------
+// Specify the layout and config
+// ------------------------------------------------------------------
+
+var LAYOUT = {
+    title: {
+        text: 'Plot of Win Con Data',
+        font: { color: 'white'}
+    },
+    xaxis: {
+        dtick: 1,
+        color: 'white',
+        showgrid: false
+    },
+    yaxis: {
+        color: 'white',
+        showgrid: false,
+        minimum: 0,
+        rangemode: 'tozero'
+    },
+    yaxis2: {
+        title: '# of Ships',
+        color: 'gray',
+        dtick: 1,
+        overlaying: 'y',
+        showgrid: false,
+        side: 'right',
+        rangemode: 'tozero'
+    },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    showlegend: true,
+    legend: { 
+        "orientation": "h",
+        font: { color: 'white'}
+    }
+};
+
+var CONFIG = { responsive: true };
 
 // ------------------------------------------------------------------
 // When a ship is updated, update the plot
@@ -177,4 +222,7 @@ function updateTraceDataArrays() {
     // Update the number of win console
     squad1NumberOfWinConsRemaining.push(squad1NumberOfWinCons);
     squad2NumberOfWinConsRemaining.push(squad2NumberOfWinCons);
+    // Update the minimum number of targets
+    squad1MinimumNumberOfTargetsToWin.push(squad1CurrentMinimumNumberOfTargetsToWin);
+    squad2MinimumNumberOfTargetsToWin.push(squad2CurrentMinimumNumberOfTargetsToWin);
 }

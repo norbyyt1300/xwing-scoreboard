@@ -74,17 +74,13 @@ var squad1NumberOfWinCons = 0;
 var squad2NumberOfWinCons = 0;
 function displayPossibilitiesUsingDatatables() {
 
-    // Initialize empty arrays
-    var squad1WinConditions_forDataTables = [];
-    var squad2WinConditions_forDataTables = [];
-
     // Create column headers
     var squad1WinConditionsColumns = createDataTablesColumnHeaders(squad2NumberOfPilots);
     var squad2WinConditionsColumns = createDataTablesColumnHeaders(squad1NumberOfPilots);
 
     // Loop through the win con possibilities and reformat the data to make it suitable for datatables
-    var squad1WinConditions_forDataTables = createDataTablesDataset(squad1WinConditions);
-    var squad2WinConditions_forDataTables = createDataTablesDataset(squad2WinConditions);
+    var squad1WinConditions_forDataTables = createDataTablesDataset(1, squad1WinConditions);
+    var squad2WinConditions_forDataTables = createDataTablesDataset(2, squad2WinConditions);
 	
 	// Save the win con count
 	squad1NumberOfWinCons = squad1WinConditions_forDataTables.length;
@@ -147,8 +143,16 @@ function createDataTablesColumnHeaders(numberOfPilots) {
 // Create Datatables dataset
 // ------------------------------------------------------------------
 
-function createDataTablesDataset(squadWinConditions) {
+function createDataTablesDataset(squadNumber, squadWinConditions) {
     var squadWinConditions_forDataTables = [];
+    // Initialize the min. # targets to win
+    var minimumNumberOfTargetsToWin = 0;
+    if (squadNumber == 1) {
+        minimumNumberOfTargetsToWin = squad2NumberOfPilots;
+    } else {
+        minimumNumberOfTargetsToWin = squad1NumberOfPilots;
+    }
+    // Loop!
     for (var i = 0; i < squadWinConditions.length; i++) {
         var winCon = squadWinConditions[i];
         var newRow = [];
@@ -167,6 +171,19 @@ function createDataTablesDataset(squadWinConditions) {
             newRow.push(pilotString);
         }
         squadWinConditions_forDataTables.push(newRow);
+        // Update the min, if it is less
+        if (newRow[1] < minimumNumberOfTargetsToWin) {
+            minimumNumberOfTargetsToWin = newRow[1];
+        }
+    }
+    // Save the current minimum number of targets to win
+    if (squadNumber == 1) {
+        squad1CurrentMinimumNumberOfTargetsToWin = minimumNumberOfTargetsToWin;
+    } else {
+        squad2CurrentMinimumNumberOfTargetsToWin = minimumNumberOfTargetsToWin;
     }
     return squadWinConditions_forDataTables;
 }
+
+var squad1CurrentMinimumNumberOfTargetsToWin = 0;
+var squad2CurrentMinimumNumberOfTargetsToWin = 0;
