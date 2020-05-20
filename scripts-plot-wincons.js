@@ -24,7 +24,7 @@ var squad2MinimumNumberOfTargetsToWin = [];
 // ------------------------------------------------------------------
 
 function resetTraces() {
-    if (enableDebug) console.log("Resetting traces!");
+    console.log("Resetting traces!");
     x = [];
 
     squad1PointsLost = [];
@@ -51,27 +51,45 @@ function resetTraces() {
 // ------------------------------------------------------------------
 
 function assembleArraysIntoDataForPlot() {
-    if (enableDebug) console.log("Assembling trace arrays into a data object suitable for plotting...");
+    console.log("Assembling trace arrays into a data object suitable for plotting...");
     var data = [{
         x: x,
         y: squad1PointsLost,
         mode: 'lines+markers',
-        name: 'Squad 1 Points Lost'
+        name: 'Squad 1 Points Lost',
+        line: {
+            color: "cyan",
+            width: 2
+        }
     }, {
         x: x,
         y: squad2PointsLost,
         mode: 'lines+markers',
-        name: 'Squad 1 Points Lost'
+        name: 'Squad 2 Points Lost',
+        line: {
+            color: "pink",
+            width: 2
+        }
     }, {
         x: x,
         y: squad1NumberOfWinConsRemaining,
         mode: 'lines+markers',
-        name: 'Squad 1 # of Win Cons Left'
+        name: 'Squad 1 # of Win Cons Left',
+        line: {
+            color: "cyan",
+            dash: 'dashdot',
+            width: 1
+        }
     }, {
         x: x,
         y: squad2NumberOfWinConsRemaining,
         mode: 'lines+markers',
-        name: 'Squad 2 # of Win Cons Left'
+        name: 'Squad 2 # of Win Cons Left',
+        line: {
+            color: "pink",
+            dash: 'dashdot',
+            width: 1
+        }
     }, {
         x: x,
         y: squad1NumberOfShipsUndamaged,
@@ -113,7 +131,7 @@ function assembleArraysIntoDataForPlot() {
         mode: 'lines+markers',
         name: 'Squad 2 Minimum # Targets to Win'
     }];
-	console.log("Chart data:", data);
+    console.log("Chart data:", data);
     return data;
 }
 
@@ -125,7 +143,7 @@ var plotCreated = false;
 function updatePlot() {
     // Update the data arrays
     updateTraceDataArrays();
-    if (enableDebug) console.log("Updating plot!");
+    console.log("Updating plot!");
     // Set up the layout and config
     var layout = {
         title: {
@@ -142,9 +160,7 @@ function updatePlot() {
     };
     var config = { responsive: true };
     // Create the plot
-
     Plotly.newPlot('winConsChart', assembleArraysIntoDataForPlot(), layout, config);
-
 }
 
 // ------------------------------------------------------------------
@@ -152,16 +168,13 @@ function updatePlot() {
 // ------------------------------------------------------------------
 
 function updateTraceDataArrays() {
-    if (enableDebug) console.log("Updating trace arrays...");
-	
-	console.log("Updating trace arrays...");
-	
-	// Increment the x axis
-	x.push(x.length + 1);
-	// Update the points lost
-	squad1PointsLost.push(parseInt(document.getElementById("squad-1-total-squad-points-destroyed").innerText));
-	squad2PointsLost.push(parseInt(document.getElementById("squad-2-total-squad-points-destroyed").innerText));
-	// Update the number of win console
-	squad1NumberOfWinConsRemaining.push(squad1NumberOfWinCons);
-	squad2NumberOfWinConsRemaining.push(squad2NumberOfWinCons);
+    console.log("Updating trace arrays...");
+    // Increment the x axis
+    x.push(x.length + 1);
+    // Update the points lost
+    squad1PointsLost.push(parseInt(document.getElementById("squad-1-total-squad-points-destroyed").innerText));
+    squad2PointsLost.push(parseInt(document.getElementById("squad-2-total-squad-points-destroyed").innerText));
+    // Update the number of win console
+    squad1NumberOfWinConsRemaining.push(squad1NumberOfWinCons);
+    squad2NumberOfWinConsRemaining.push(squad2NumberOfWinCons);
 }

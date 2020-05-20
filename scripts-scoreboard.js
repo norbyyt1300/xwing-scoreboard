@@ -97,17 +97,17 @@ function populateScoreboard() {
     populateScoreboardForASquad("squad1XWS", "squad1Form", 1);
     populateScoreboardForASquad("squad2XWS", "squad2Form", 2);
     scoreboardCreated = true;
+    // Reset the win con possibilities arrays for both squads
+    
     // Update the win con possibilities arrays for both squads
     updateWinConditionPossibilitiesArrayForThisSquad(1);
     updateWinConditionPossibilitiesArrayForThisSquad(2);
     // Now that the win con possibilities have been updated, display them
     displayPossibilitiesUsingDatatables();
-    /*
+    
     // Finally, update the plot
 	resetTraces();
-	updateTraceDataArrays();
     updatePlot();
-    */
 }
 
 // ------------------------------------------------------------------
@@ -231,6 +231,8 @@ function shipStatusChanged(squadNumber) {
     }
     // Now that the win con possibilities have been updated, display them
     displayPossibilitiesUsingDatatables();
+    // Next, plot the difference
+    updatePlot();    
 }
 
 var squad1PointsDestroyed = 0;

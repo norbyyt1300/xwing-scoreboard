@@ -88,7 +88,7 @@ function displayPossibilitiesUsingDatatables() {
 	
 	// Save the win con count
 	squad1NumberOfWinCons = squad1WinConditions_forDataTables.length;
-	squad2NumberOfWinCons = squad1WinConditions_forDataTables.length;
+	squad2NumberOfWinCons = squad2WinConditions_forDataTables.length;
 
     // Log to console
     if (enableDebug) console.log("Squad 1 win cons data set for datatables:", squad1WinConditions_forDataTables);
